@@ -15,6 +15,7 @@ public class MathWindow : MonoBehaviour {
     bool button;
     float myFloat = 1.23f;
     char[] charArray;
+    int treeHeight = 0;
 
     //[MenuItem("Window/MathWindow")]//This is the location of the window
     //public static void ShowWindow()
@@ -82,168 +83,14 @@ public class MathWindow : MonoBehaviour {
 
         ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
         Debug.Log(parseTree.getValue());
-        double result = ShuntingYardDemo.EvaluateAST(parseTree);
-        myString2 = result + "";
-        Debug.Log(myString2);
+        GameObject root = GameObject.Find("Root");
+
+        parser.DrawAST(parseTree, root, false, false);
+        
+        //double result = ShuntingYardDemo.EvaluateAST(parseTree);
+        //myString2 = result + "";
+        //Debug.Log(myString2);
     }
-
-    //need to figure out how to simulate node snapping into branches
-    //probably somewhere along the lines of 
-    //1. order, parenthesize, then expand
-    //2. place root in root position, 
-    //3. if root has children, go depth-first
-    //4. place left children first, then right
-    //5. If left, use a method to instantiate a branch and a node at the proper coordinates
-    //6. Then change root to new child
-    //7. When there are no more left children
-    //8. Move back to the previous root (store it in a list)
-    //9. If there are no more left children, then place right child
-    //10. Then change root to new child
-    //11. If there is a left child, populate with node, and change root
-    //12. If there is no left child, populate right with node, and then change root
-    //13. If there are no right child either, move to previous root.
-    //14. If there are no right child again, move to previous root.
-    //15. If we are at the root and there no more children to fill in, then finished
-
-
-    ////1. order, parenthesize, then expand
-    //void TakeStringAndParse() {//later, parenthesized parts should be treated like a completely separate equation (almost)
-    //    charArray = myString.ToCharArray();
-    //    int[] leftRightArray = new int[charArray.Length];
-    //    int[] priorityArray = new int[charArray.Length];
-    //    int[] heightArray = new int[charArray.Length];
-    //    int orderLeftRight = 0;
-    //    int orderPriority = 0;
-    //    int height = 0;
-
-
-    //    int[] orderArray = new int[charArray.Length];
-    //    int order = 0;
-
-    //    for (int i = 0; i < charArray.Length; i++)
-    //    {
-    //        leftRightArray[i] = -1;
-    //        priorityArray[i] = -1;
-    //    }
-
-    //    for (int i = 0; i < charArray.Length; i++) {
-    //        if (charArray[i] == '(')
-    //        {
-    //            height++;
-    //            heightArray[i] = height;
-    //        }
-    //        else if (charArray[i] == ')')
-    //        {
-    //            heightArray[i] = height;
-    //            height--;
-    //        }
-    //        else 
-    //        {
-    //            heightArray[i] = height;
-    //        }
-
-    //    }
-
-
-    //    for (int i = 0; i < leftRightArray.Length; i++)
-    //    {
-    //        //moving left to right, tag with priority based on Exponents
-    //        if (charArray[i] == '^')
-    //        {
-    //            leftRightArray[i] = orderLeftRight++;
-    //            priorityArray[i] = orderPriority;
-    //        }
-    //    }
-    //    orderPriority++;
-    //    for (int i = 0; i < leftRightArray.Length; i++)
-    //    {
-    //        //moving left to right, tag with priority based on Division/Multiplication
-    //        if (charArray[i] == '/' || charArray[i] == '*')
-    //        {
-    //            leftRightArray[i] = orderLeftRight++;
-    //            priorityArray[i] = orderPriority;
-    //        }
-    //    }
-    //    orderPriority++;
-    //    for (int i = 0; i < leftRightArray.Length; i++)
-    //    {
-    //        //moving left to right, tag with priority based on Subtraction/Addition
-    //        if (charArray[i] == '-' || charArray[i] == '+')
-    //        {
-    //            leftRightArray[i] = orderLeftRight++;
-    //            priorityArray[i] = orderPriority;
-    //        }
-    //    }
-
-    //    string temp = "";
-    //    for (int i = 0; i < charArray.Length; i++) {
-    //        temp = temp + charArray[i];
-    //    }
-    //    Debug.Log(temp.ToString());
-    //    temp = "";
-    //    for (int i = 0; i < charArray.Length; i++)
-    //    {
-    //        temp = temp + leftRightArray[i];
-    //    }
-    //    Debug.Log(temp.ToString());
-    //    temp = "";
-    //    for (int i = 0; i < charArray.Length; i++)
-    //    {
-    //        temp = temp + priorityArray[i];
-    //    }
-    //    Debug.Log(temp.ToString());
-    //    temp = "";
-    //    for (int i = 0; i < charArray.Length; i++)
-    //    {
-    //        temp = temp + heightArray[i];
-    //    }
-    //    Debug.Log(temp.ToString());
-
-    //    //generate rules for inside height and in-between
-
-    //}
-    ////2. place root in root position, 
-    ////3. if root has children, go depth-first
-    ////4. place left children first, then right
-    ////5. If left, use a method to instantiate a branch and a node at the proper coordinates
-    ////6. Then change root to new child
-    ////7. When there are no more left children
-    ////8. Move back to the previous root (store it in a list)
-    ////9. If there are no more left children, then place right child
-    ////10. Then change root to new child
-    ////11. If there is a left child, populate with node, and change root
-    ////12. If there is no left child, populate right with node, and then change root
-    ////13. If there are no right child either, move to previous root.
-    ////14. If there are no right child again, move to previous root.
-    ////15. If we are at the root and there no more children to fill in, then finished
-
-
-    //void ShuntingYardToTree(string equation) {
-    //    Stack<string> num;
-    //    Stack<string> op;
-
-    //    string temp;
-
-    //    for (int i = 0; i < equation.Length; i++) {
-
-    //        //if number, check how long the number is
-    //        //then store into temp
-    //        switch (equation[i]) { 
-    //            case '0';
-    //            case '1';
-    //            case '2';
-    //            case '3';
-    //            case '4';
-    //            case '5';
-    //            case '6';
-    //            case '7';
-    //            case '8';
-    //            case '9';
-    //        }
-    //    }
-
-
-    //}
 }
 
 //from https://www.klittlepage.com/2013/12/22/twelve-days-2013-shunting-yard-algorithm/
@@ -336,6 +183,8 @@ public class ASTNode
 }
 
 public class ShuntingYardParser {
+
+    int treeHeight = 0;
     private Dictionary<char, IMyOperator> operators;
 
     private static void AddNode(Stack<ASTNode> stack, char myOperator) {
@@ -359,7 +208,7 @@ public class ShuntingYardParser {
         foreach (char c in chars)
         {
             char popped;
-            main://used by goto - transferred over from Java labelled breaks - causes infinite looping
+            //main://used by goto - transferred over from Java labelled breaks - causes infinite loopingf
             switch (c)
             {
                 case ' ':
@@ -372,8 +221,9 @@ public class ShuntingYardParser {
                     {//stack is not empty
                         popped = operatorStack.Pop();
                         if ('(' == popped)
-                        {                            
-                            goto main;
+                        {
+                            //goto main;
+                            break;
                         }
                         else
                         {
@@ -401,8 +251,6 @@ public class ShuntingYardParser {
                             {
                                 break;
                             }
-
-
                         }
                         operatorStack.Push(c);
                     }
@@ -418,6 +266,53 @@ public class ShuntingYardParser {
             AddNode(operandStack, operatorStack.Pop());
         }
         return operandStack.Pop();
+    }
+
+    internal void DrawAST(ASTNode parseTree, GameObject parent, bool left, bool right)
+    {
+        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"));
+        nodePrefab.transform.SetParent(parent.transform);
+
+        float x = 0;
+        if (left)
+        {
+            x = -1f;
+        }
+        else if (right)
+        {
+            x = 1f;
+        }
+        else 
+        {
+            x = 0f;
+        }
+
+
+        nodePrefab.transform.localPosition = new Vector3(x, 1f, 0f);
+        treeHeight++;
+        Console.WriteLine(treeHeight);
+        NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
+        nodeScript.val = parseTree.getValue()+"";
+        nodeScript.left = left;
+        nodeScript.right = right;
+        nodeScript.parent = parent;
+
+        ASTNode leftNode = parseTree.getLeftASTNode();
+        ASTNode rightNode = parseTree.getRightASTNode();
+
+        if (leftNode != null) {
+            DrawAST(leftNode, nodePrefab, true, false);
+        }
+
+        if (rightNode != null){
+            DrawAST(rightNode, nodePrefab, false, true);
+        }
+
+        return;
+
+        //instantiate physical node
+        //set value
+        //set location
     }
 }
 
