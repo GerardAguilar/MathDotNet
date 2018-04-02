@@ -1,388 +1,449 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System;
+﻿//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
+//using UnityEditor;
+//using System;
 
 
-//code is inaccurate, but functional
-//[InitializeOnLoad]
-public class MathWindow : MonoBehaviour {
-    public string input = "Hello World";
-    string myString2 = "Yo";
-    bool groupEnabled;
-    bool myBool = true;
-    bool button;
-    float myFloat = 1.23f;
-    char[] charArray;
-    int treeHeight = 0;
-
-    //[MenuItem("Window/MathWindow")]//This is the location of the window
-    //public static void ShowWindow()
-    //{
-    //    EditorWindow.GetWindow(typeof(MathWindow));
-    //}
-    //static MathWindow() {
-    //    EditorApplication.update += Update;
-    //}
-
-    //static void Update() {
-    //    Debug.Log("Updating");
-    //}
-
-    //there may be a better way of doing this by using two stacks
-    //or by figuring out the 'last' operation, setting that as a root, splitting to left and right, then continuing the same thing with the branches
-
-    //void OnGUI() {
-    //    GUILayout.Label("Base Settings", EditorStyles.boldLabel);
-    //    myString = EditorGUILayout.TextField("Text Field", myString);
-    //    myString2 = EditorGUILayout.TextField("Text Field", myString2);
-
-    //    groupEnabled = EditorGUILayout.BeginToggleGroup("Optional Settings", groupEnabled);
-    //    myBool = EditorGUILayout.Toggle("Toggle", myBool);
-    //    myFloat = EditorGUILayout.Slider("Slider", myFloat, -3, 3);
-    //    EditorGUILayout.EndToggleGroup();
-
-    //    String input = "3 + 4 * 2 / (1 - 5) ^ 2 ^ 3";
-    //    myString = "3 + 4 * 2 / (1 - 5) ^ 2 ^ 3";
-
-    //    button = GUI.Button(new Rect(4, 100, 30, 30), "X");
-    //    if (button) {
-    //        ICollection<IMyOperator> operators = new List<IMyOperator>();
-    //        operators.Add(new MyBaseOperator('^', true, 4));
-    //        operators.Add(new MyBaseOperator('*', false, 3));
-    //        operators.Add(new MyBaseOperator('/', false, 3));
-    //        operators.Add(new MyBaseOperator('+', false, 2));
-    //        operators.Add(new MyBaseOperator('-', false, 2));
-
-    //        ShuntingYardParser parser = new ShuntingYardParser(operators);
-            
-    //        ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
-    //        //double result = ShuntingYardDemo.EvaluateAST(parseTree);
-    //        //myString2 = result + "";
-    //    }
-    //}
-
-    void Awake()
-    {
-        //String input = "3 + 4 * 2 / (1 - 5) ^ 2 ^ 3";
-        //String input = "(1 - 5) ^ 2 ^ 3";
-        //String input = "3 + 4 * 2 / (1 - 5) ^ 2";
-        //String input = "1 + 2";
-        //String input = "1 + 2";
-        //Console.WriteLine("input = " + input);
-        Debug.Log("input = " + input);
-        ICollection<IMyOperator> operators = new List<IMyOperator>();
-        operators.Add(new MyBaseOperator('^', true, 4));
-        operators.Add(new MyBaseOperator('*', false, 3));
-        operators.Add(new MyBaseOperator('/', false, 3));
-        operators.Add(new MyBaseOperator('+', false, 2));
-        operators.Add(new MyBaseOperator('-', false, 2));
-
-        ShuntingYardParser parser = new ShuntingYardParser(operators);
-
-        ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
-        Debug.Log(parseTree.getValue());
-        GameObject root = GameObject.Find("Root");
-
-        parser.DrawAST(parseTree, root, false, false);
-        
-        //double result = ShuntingYardDemo.EvaluateAST(parseTree);
-        //myString2 = result + "";
-        //Debug.Log(myString2);
-    }
-}
-
-//from https://www.klittlepage.com/2013/12/22/twelve-days-2013-shunting-yard-algorithm/
-//modified for C#
-public interface IMyOperator 
-{
-    bool IsRightAssociative();
-    int ComparePrecedence(IMyOperator o);
-    char GetSymbol();
-}
-
-public class MyBaseOperator : IMyOperator
-{
-    public char symbol;
-    public bool rightAssociative;
-    public int precedence;
-
-    public MyBaseOperator(char symbol, bool rightAssociative, int precedence) {
-        this.symbol = symbol;
-        this.rightAssociative = rightAssociative;
-        this.precedence = precedence;
-    }
-
-    public bool IsRightAssociative() {
-        return rightAssociative;
-    }
-
-    
-    public int ComparePrecedence(IMyOperator o) {
-        bool result = (o is MyBaseOperator);
-        int tempPrecedence;
-        if (result){
-            MyBaseOperator other = (MyBaseOperator)o;
-            if (precedence > other.precedence)
-            {
-                tempPrecedence = 1;
-            }
-            else if (other.precedence == precedence)
-            {
-                tempPrecedence = 0;
-            }
-            else {
-                tempPrecedence = -1;
-            }
-            return tempPrecedence;
-            //since I'm not used to the bottom structure, I unfolded it above.
-            //return precedence > other.precedence ? 1 : 
-            //    other.precedence == precedence ? 0 : -1;
-        }
-        else{
-            return -o.ComparePrecedence(this);
-        }
-    }
-
-    public char GetSymbol() {
-        return symbol;
-    }
-
-    public override string ToString()
-    {
-        return char.ToString(symbol);
-    }
-}
-
-public class ASTNode
-{
-    private char value;
-    private ASTNode leftASTNode;
-    private ASTNode rightASTNode;
+////code is inaccurate, but functional
+////[InitializeOnLoad]
+//public class MathWindow : MonoBehaviour
+//{
+//    public string input = "Hello World";
+//    string myString2 = "Yo";
+//    bool groupEnabled;
+//    bool myBool = true;
+//    bool button;
+//    float myFloat = 1.23f;
+//    char[] charArray;
+//    int treeHeight = 0;
 
 
-    public ASTNode(char value, ASTNode leftASTNode, ASTNode rightASTNode) {
-        this.value = value;
-        this.leftASTNode = leftASTNode;
-        this.rightASTNode = rightASTNode;
+//    void Awake()
+//    {
+//        Debug.Log("input = " + input);//3 + 4 * 2 / (1 - 5) ^ 2 ^ 3
+//        /*
+//         3 + 4 * 2 / (1 - 5) ^ 2 ^ 3
+//           +       
+//         3          
+//                   /         
+//               *             ^
+//             4   2   (  -  )     ^  
+//                      1   5    2   3
+//         */
+//        ICollection<IMyOperator> operators = new List<IMyOperator>();
+//        operators.Add(new MyBaseOperator('^', true, 4));
+//        operators.Add(new MyBaseOperator('*', false, 3));
+//        operators.Add(new MyBaseOperator('/', false, 3));
+//        operators.Add(new MyBaseOperator('+', false, 2));
+//        operators.Add(new MyBaseOperator('-', false, 2));
 
-    }
+//        ShuntingYardParser parser = new ShuntingYardParser(operators);
 
-    public char getValue() {
-        return value;
-    }
+//        ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
+//        Debug.Log(parseTree.getValue());
+//        GameObject treeTop = GameObject.Find("Tree");
 
-    public ASTNode getLeftASTNode() {
-        return leftASTNode;
-    }
-
-    public ASTNode getRightASTNode() {
-        return rightASTNode;
-    }
-}
-
-public class ShuntingYardParser {
-
-    int treeHeight = 0;
-    private Dictionary<char, IMyOperator> operators;
-
-    private static void AddNode(Stack<ASTNode> stack, char myOperator) {
-        ASTNode rightASTNode = stack.Pop();
-        ASTNode leftASTNode = stack.Pop();
-        stack.Push(new ASTNode(myOperator, leftASTNode, rightASTNode));
-    }
-
-    public ShuntingYardParser(ICollection<IMyOperator> operators){
-        this.operators = new Dictionary<char, IMyOperator>();
-        foreach (IMyOperator o in operators) {
-            this.operators.Add(o.GetSymbol(), o);
-        }
-    }
-
-    public ASTNode ConvertInfixNotationToAST(string input) {
-        Stack<char> operatorStack = new Stack<char>();
-        Stack<ASTNode> operandStack = new Stack<ASTNode>();
-        char[] chars = input.ToCharArray();
-
-        foreach (char c in chars)
-        {
-            char popped;
-            //main://used by goto - transferred over from Java labelled breaks - causes infinite loopingf
-            switch (c)
-            {
-                case ' ':
-                    break;
-                case '(':
-                    operatorStack.Push('(');
-                    break;
-                case ')':
-                    while (!(operatorStack.Count == 0))
-                    {//stack is not empty
-                        popped = operatorStack.Pop();
-                        if ('(' == popped)
-                        {
-                            //goto main;
-                            break;
-                        }
-                        else
-                        {
-                            AddNode(operandStack, popped);
-                        }
-                        //throw new System.Exception("Unbalanced right parenthesis");                        
-                    }
-                    break;
-                default:
-                    if (operators.ContainsKey(c))
-                    {
-                        IMyOperator o1;
-                        operators.TryGetValue(c, out o1);
-                        IMyOperator o2;
-                        //while operatorStack is not empty and that the next operator in the operatorstack is a valid operator
-                        while (!(operatorStack.Count == 0) && operators.TryGetValue(operatorStack.Peek(), out o2))
-                        {
-                            //TODO: clarify bottom conditions
-                            if (!o1.IsRightAssociative() && 0 == o1.ComparePrecedence(o2) || o1.ComparePrecedence(o2) < 0)//this condition needs to be modified, because it assumes that the 3rd and up operations have no say in precedence. Example 1 + 2 * 3 ^ 2
-                            {
-                                operatorStack.Pop();
-                                AddNode(operandStack, o2.GetSymbol());
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        operatorStack.Push(c);
-                    }
-                    else
-                    {
-                        operandStack.Push(new ASTNode(c, null, null));
-                    }
-                    break;
-            }
-        }
-        while (!(operatorStack.Count == 0))
-        {
-            AddNode(operandStack, operatorStack.Pop());
-        }
-        return operandStack.Pop();
-    }
-
-    internal void DrawAST(ASTNode parseTree, GameObject parent, bool left, bool right)
-    {
-        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"));
-        nodePrefab.transform.SetParent(parent.transform);
-
-        float x = 0;
-        if (left)
-        {
-            x = -1f;
-        }
-        else if (right)
-        {
-            x = 1f;
-        }
-        else 
-        {
-            x = 0f;
-        }
+//        //parser.DrawAST(parseTree, treeTop, false, false);
+//        parser.designateHierarchy(parseTree, false, false);
+//        parser.DrawAST2(parseTree, treeTop);
 
 
-        nodePrefab.transform.localPosition = new Vector3(x, 1f, 0f);
-        treeHeight++;
-        Console.WriteLine(treeHeight);
-        NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
-        nodeScript.val = parseTree.getValue()+"";
-        nodeScript.left = left;
-        nodeScript.right = right;
-        nodeScript.parent = parent;
+//    }
+//}
 
-        ASTNode leftNode = parseTree.getLeftASTNode();
-        ASTNode rightNode = parseTree.getRightASTNode();
+////from https://www.klittlepage.com/2013/12/22/twelve-days-2013-shunting-yard-algorithm/
+////modified for C#
+//public interface IMyOperator
+//{
+//    bool IsRightAssociative();
+//    int ComparePrecedence(IMyOperator o);
+//    char GetSymbol();
+//}
 
-        if (leftNode != null) {
-            DrawAST(leftNode, nodePrefab, true, false);
-        }
+//public class MyBaseOperator : IMyOperator
+//{
+//    public char symbol;
+//    public bool rightAssociative;
+//    public int precedence;
 
-        if (rightNode != null){
-            DrawAST(rightNode, nodePrefab, false, true);
-        }
+//    public MyBaseOperator(char symbol, bool rightAssociative, int precedence)
+//    {
+//        this.symbol = symbol;
+//        this.rightAssociative = rightAssociative;
+//        this.precedence = precedence;
+//    }
 
-        return;
+//    public bool IsRightAssociative()
+//    {
+//        return rightAssociative;
+//    }
 
-        //instantiate physical node
-        //set value
-        //set location
-    }
-}
 
-public static class ShuntingYardDemo {
-    public static double EvaluateAST(ASTNode tree) {
-        double tempVal;
-        switch (tree.getValue()) { 
-            case '^':
-                tempVal = Math.Pow(EvaluateAST(tree.getLeftASTNode()), EvaluateAST(tree.getRightASTNode()));
-                break;
-            case '*':
-                tempVal = EvaluateAST(tree.getLeftASTNode()) * EvaluateAST(tree.
-                        getRightASTNode());
-                break;
-            case '/':
-                tempVal = EvaluateAST(tree.getLeftASTNode()) / EvaluateAST(tree.
-                        getRightASTNode());
-                break;
-            case '+':
-                tempVal = EvaluateAST(tree.getLeftASTNode()) + EvaluateAST(tree.
-                        getRightASTNode());
-                break;
-            case '-':
-                tempVal = EvaluateAST(tree.getLeftASTNode()) - EvaluateAST(tree.
-                        getRightASTNode());
-                break;
-            default:
-                //return Double.valueOf(char.toString(
-                //        tree.getValue()));
-                tempVal = Double.Parse(tree.getValue().ToString());
-                break;
-        }
-        return tempVal;
-    }
-
-    //public static void main(String[] args) {
-    //    ICollection<IMyOperator> operators = new List<IMyOperator>();
-    //    operators.Add(new MyBaseOperator('^', true, 4));
-    //    operators.Add(new MyBaseOperator('*', false, 3));
-    //    operators.Add(new MyBaseOperator('/', false, 3));
-    //    operators.Add(new MyBaseOperator('+', false, 2));
-    //    operators.Add(new MyBaseOperator('-', false, 2));
-
-    //    ShuntingYardParser parser = new ShuntingYardParser(operators);
-    //    String input = "3 + 4 * 2 / (1 - 5) ^ 2 ^ 3";
-
-    //    ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
-    //    double result = EvaluateAST(parseTree);
-        
-    //}
-}
-
-//public class MathNode{
-//    //attributes
-//    string operation;
-//    char[] left;
-//    char[] right;
-
-//    //constructor
-//    public MathNode(string op, char[] leftside, char[] rightside) {
-//        operation = op;
-//        left = new char[leftside.Length];
-//        for (int i = 0; i < leftside.Length; i++) {
-//            left[i] = leftside[i];
+//    public int ComparePrecedence(IMyOperator o)
+//    {
+//        bool result = (o is MyBaseOperator);
+//        int tempPrecedence;
+//        if (result)
+//        {
+//            MyBaseOperator other = (MyBaseOperator)o;
+//            if (precedence > other.precedence)
+//            {
+//                tempPrecedence = 1;
+//            }
+//            else if (other.precedence == precedence)
+//            {
+//                tempPrecedence = 0;
+//            }
+//            else
+//            {
+//                tempPrecedence = -1;
+//            }
+//            return tempPrecedence;
+//            //since I'm not used to the bottom structure, I unfolded it above.
+//            //return precedence > other.precedence ? 1 : 
+//            //    other.precedence == precedence ? 0 : -1;
 //        }
-//        right = new char[rightside.Length];
-//        for (int i = 0; i < rightside.Length; i++) {
-//            right[i] = rightside[i];
+//        else
+//        {
+//            return -o.ComparePrecedence(this);
 //        }
 //    }
-    
-//    //method
+
+//    public char GetSymbol()
+//    {
+//        return symbol;
+//    }
+
+//    public override string ToString()
+//    {
+//        return char.ToString(symbol);
+//    }
 //}
+
+
+///// <summary>
+///// ASTNode should store all of the node's actual information, it should also be able to link to it's own gameobject
+///// value, leftASTNode, rightASTNode
+///// </summary>
+//public class ASTNode
+//{
+//    private char value;
+//    private ASTNode leftASTNode;
+//    private ASTNode rightASTNode;
+//    public GameObject partner;
+//    public bool isLeft;
+//    public bool isRight;
+
+//    public ASTNode(char value, ASTNode leftASTNode, ASTNode rightASTNode)
+//    {
+//        this.value = value;
+//        this.leftASTNode = leftASTNode;
+//        this.rightASTNode = rightASTNode;
+//    }
+
+//    public char getValue()
+//    {
+//        return this.value;
+//    }
+
+//    public ASTNode getLeftASTNode()
+//    {
+//        return this.leftASTNode;
+//    }
+
+//    public ASTNode getRightASTNode()
+//    {
+//        return this.rightASTNode;
+//    }
+
+//}
+
+//public class ShuntingYardParser
+//{
+
+//    int treeHeight = 0;
+//    private Dictionary<char, IMyOperator> operators;
+
+//    private static void AddNode(Stack<ASTNode> stack, char myOperator)
+//    {
+//        ASTNode rightASTNode = stack.Pop();
+//        ASTNode leftASTNode = stack.Pop();
+//        stack.Push(new ASTNode(myOperator, leftASTNode, rightASTNode));//does the stack know what is left or right?
+//    }
+
+//    public ShuntingYardParser(ICollection<IMyOperator> operators)
+//    {
+//        this.operators = new Dictionary<char, IMyOperator>();
+//        foreach (IMyOperator o in operators)
+//        {
+//            this.operators.Add(o.GetSymbol(), o);
+//        }
+//    }
+
+//    public ASTNode ConvertInfixNotationToAST(string input)
+//    {
+//        Stack<char> operatorStack = new Stack<char>();
+//        Stack<ASTNode> operandStack = new Stack<ASTNode>();
+//        char[] chars = input.ToCharArray();
+
+//        foreach (char c in chars)
+//        {
+//            char popped;
+//            //main://used by goto - transferred over from Java labelled breaks - causes infinite loopingf
+//            switch (c)
+//            {
+//                case ' ':
+//                    break;
+//                case '(':
+//                    operatorStack.Push('(');
+//                    break;
+//                case ')':
+//                    while (!(operatorStack.Count == 0))
+//                    {//stack is not empty
+//                        popped = operatorStack.Pop();
+//                        if ('(' == popped)
+//                        {
+//                            //goto main;
+//                            break;
+//                        }
+//                        else
+//                        {
+//                            AddNode(operandStack, popped);
+//                        }
+//                        //throw new System.Exception("Unbalanced right parenthesis");                        
+//                    }
+//                    break;
+//                default:
+//                    if (operators.ContainsKey(c))
+//                    {
+//                        IMyOperator o1;
+//                        operators.TryGetValue(c, out o1);
+//                        IMyOperator o2;
+//                        //while operatorStack is not empty and that the next operator in the operatorstack is a valid operator
+//                        while (!(operatorStack.Count == 0) && operators.TryGetValue(operatorStack.Peek(), out o2))
+//                        {
+//                            //TODO: clarify bottom conditions
+//                            if (!o1.IsRightAssociative() && 0 == o1.ComparePrecedence(o2) || o1.ComparePrecedence(o2) < 0)//this condition needs to be modified, because it assumes that the 3rd and up operations have no say in precedence. Example 1 + 2 * 3 ^ 2
+//                            {
+//                                operatorStack.Pop();
+//                                AddNode(operandStack, o2.GetSymbol());
+//                            }
+//                            else
+//                            {
+//                                break;
+//                            }
+//                        }
+//                        operatorStack.Push(c);
+//                    }
+//                    else
+//                    {
+//                        operandStack.Push(new ASTNode(c, null, null));
+//                    }
+//                    break;
+//            }
+//        }
+//        while (!(operatorStack.Count == 0))
+//        {
+//            AddNode(operandStack, operatorStack.Pop());
+//        }
+//        return operandStack.Pop();
+//    }
+
+//    internal void DrawAST2(ASTNode node, GameObject parentToBe)
+//    {
+//        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"));
+//        ASTNode left;
+//        ASTNode right;
+
+//        //assign ASTNode values to GameObject<NodeScript> values
+//        NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
+//        nodeScript.val = node.getValue() + "";
+//        nodeScript.left = node.isLeft;
+//        nodeScript.right = node.isRight;
+//        nodeScript.parent = parentToBe;
+//        //nodeScript.partner = node.partner;
+
+
+
+//        //change the object's transform
+//        //store parent and parent's partner in grandparent
+//        NodeScript parentNodeScript = parentToBe.GetComponent<NodeScript>();
+//        if (parentNodeScript.parent != null)
+//        {
+
+//        }
+
+
+
+//        nodePrefab.transform.SetParent(parentToBe.transform);
+//        if (parentNodeScript.left)
+//        {
+//            if (nodeScript.right)
+//            {
+//                parentToBe.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//            else if (nodeScript.left)
+//            {
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//        }
+//        else if (parentNodeScript.right)
+//        {
+//            if (nodeScript.left)
+//            {
+//                parentToBe.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//            else if (nodeScript.right)
+//            {
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//        }
+//        else //if parent is the root 
+//        {
+//            if (nodeScript.left)
+//            {
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//            else if (nodeScript.right)
+//            {
+//                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+//            }
+//        }
+
+//        //Recurse through the left and right children of the newly instantiated node
+//        if (node.getLeftASTNode() != null)
+//        {
+//            DrawAST2(node.getLeftASTNode(), nodePrefab);
+//        }
+
+//        if (node.getRightASTNode() != null)
+//        {
+//            DrawAST2(node.getRightASTNode(), nodePrefab);
+//        }
+
+//        return;
+//    }
+
+//    //was completing but inaccurate left/right marking. Fixing caused NullReference for MathWindow cs:324
+//    internal void designateHierarchy(ASTNode node, bool currentNodeIsLeft, bool currentNodeIsRight)
+//    {
+//        //set root left/right to false when first calling designateHierarchy
+//        //subsequent calls would use this to designate the left/right positions of the node it's going into
+//        node.isLeft = currentNodeIsLeft;
+//        node.isRight = currentNodeIsRight;
+
+//        if (node.getLeftASTNode() != null && node.getRightASTNode() != null)
+//        {
+//            //label left nodes as left, and right nodes as right
+
+//            node.getLeftASTNode().isLeft = true;
+//            node.getLeftASTNode().isRight = false;
+
+//            node.getRightASTNode().isLeft = false;
+//            node.getRightASTNode().isRight = true;
+
+//            node.getLeftASTNode().parentPartner = node.getRightASTNode();
+//            node.getRightASTNode().parentPartner = node.getLeftASTNode();
+
+
+//            if (node.getLeftASTNode().getLeftASTNode() != null)
+//            {
+//                designateHierarchy(node.getLeftASTNode().getLeftASTNode(), true, false);
+//            }
+
+//            if (node.getLeftASTNode().getRightASTNode() != null)
+//            {
+//                designateHierarchy(node.getLeftASTNode().getRightASTNode(), false, true);
+
+//            }
+
+//            if (node.getRightASTNode().getLeftASTNode() != null)
+//            {
+//                designateHierarchy(node.getRightASTNode().getLeftASTNode(), true, false);
+//            }
+
+//            if (node.getRightASTNode().getRightASTNode() != null)
+//            {
+//                designateHierarchy(node.getRightASTNode().getRightASTNode(), false, true);
+//            }
+//        }
+//        return;
+//    }
+//}
+
+//public static class ShuntingYardDemo
+//{
+//    public static double EvaluateAST(ASTNode tree)
+//    {
+//        double tempVal;
+//        switch (tree.getValue())
+//        {
+//            case '^':
+//                tempVal = Math.Pow(EvaluateAST(tree.getLeftASTNode()), EvaluateAST(tree.getRightASTNode()));
+//                break;
+//            case '*':
+//                tempVal = EvaluateAST(tree.getLeftASTNode()) * EvaluateAST(tree.
+//                        getRightASTNode());
+//                break;
+//            case '/':
+//                tempVal = EvaluateAST(tree.getLeftASTNode()) / EvaluateAST(tree.
+//                        getRightASTNode());
+//                break;
+//            case '+':
+//                tempVal = EvaluateAST(tree.getLeftASTNode()) + EvaluateAST(tree.
+//                        getRightASTNode());
+//                break;
+//            case '-':
+//                tempVal = EvaluateAST(tree.getLeftASTNode()) - EvaluateAST(tree.
+//                        getRightASTNode());
+//                break;
+//            default:
+//                //return Double.valueOf(char.toString(
+//                //        tree.getValue()));
+//                tempVal = Double.Parse(tree.getValue().ToString());
+//                break;
+//        }
+//        return tempVal;
+//    }
+
+//    //public static void main(String[] args) {
+//    //    ICollection<IMyOperator> operators = new List<IMyOperator>();
+//    //    operators.Add(new MyBaseOperator('^', true, 4));
+//    //    operators.Add(new MyBaseOperator('*', false, 3));
+//    //    operators.Add(new MyBaseOperator('/', false, 3));
+//    //    operators.Add(new MyBaseOperator('+', false, 2));
+//    //    operators.Add(new MyBaseOperator('-', false, 2));
+
+//    //    ShuntingYardParser parser = new ShuntingYardParser(operators);
+//    //    String input = "3 + 4 * 2 / (1 - 5) ^ 2 ^ 3";
+
+//    //    ASTNode parseTree = parser.ConvertInfixNotationToAST(input);
+//    //    double result = EvaluateAST(parseTree);
+
+//    //}
+//}
+
+////public class MathNode{
+////    //attributes
+////    string operation;
+////    char[] left;
+////    char[] right;
+
+////    //constructor
+////    public MathNode(string op, char[] leftside, char[] rightside) {
+////        operation = op;
+////        left = new char[leftside.Length];
+////        for (int i = 0; i < leftside.Length; i++) {
+////            left[i] = leftside[i];
+////        }
+////        right = new char[rightside.Length];
+////        for (int i = 0; i < rightside.Length; i++) {
+////            right[i] = rightside[i];
+////        }
+////    }
+
+////    //method
+////}

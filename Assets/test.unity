@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.57481706, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -113,48 +113,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &266520256
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1 &281930682
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,7 +202,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1255938251}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0948d7394053944d944b93e427a7752, type: 3}
+  m_Script: {fileID: 11500000, guid: 9406f60b5f808364f822b018540f14ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   input: 3 + 4 * 2 / (1 - 5) ^ 2 ^ 3
@@ -302,7 +260,24 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1590617910134402, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
       propertyPath: m_Name
-      value: Root
+      value: Tree
+      objectReference: {fileID: 0}
+    - target: {fileID: 23553011030871024, guid: e075a8dac9254fc4990084dc0b010f6c,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3b7275f445c3b4e4ab34657254292391, type: 2}
+    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4401349548501816, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
+      propertyPath: m_LocalScale.z
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e075a8dac9254fc4990084dc0b010f6c, type: 2}
