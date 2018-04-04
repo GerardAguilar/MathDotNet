@@ -45,7 +45,7 @@ public class Parser : MonoBehaviour
 
         //parser.DrawAST(parseTree, treeTop, false, false);
         parser.designateHierarchy(parseTree, false, false);
-        parser.DrawAST2(parseTree, treeTop);
+        parser.DrawAST2(parseTree, treeTop, 0);
 
 
     }
@@ -130,6 +130,7 @@ public class ASTNode
     public ASTNode astNodePartner;
     public ASTNode astNodeLeftChild;
     public ASTNode astNodeRightChild;
+    public NodeScript astNodeScript;
     public bool isLeft;
     public bool isRight;
 
@@ -159,7 +160,6 @@ public class ASTNode
 
 public class ShuntingYardParser
 {
-
     int treeHeight = 0;
     private Dictionary<char, IMyOperator> operators;
 
@@ -248,7 +248,6 @@ public class ShuntingYardParser
         return operandStack.Pop();
     }
 
-    //was completing but inaccurate left/right marking. Fixing caused NullReference for MathWindow cs:324
     internal void designateHierarchy(ASTNode node, bool currentNodeIsLeft, bool currentNodeIsRight)
     {
         //set root left/right to false when first calling designateHierarchy
@@ -294,15 +293,22 @@ public class ShuntingYardParser
         return;
     }
 
-    internal void DrawAST2(ASTNode node, GameObject parentToBe)
+    internal void DrawAST2(ASTNode node, GameObject parentToBe, int shiftNodeLocation)
     {
-        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"));
+        int localShiftNodeLocation = shiftNodeLocation;
+
+        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/NodeText"));
         nodePrefab.transform.SetParent(parentToBe.transform);
 
         //assign ASTNode values to GameObject<NodeScript> values
         NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
-        nodeScript.node = node;
+
         nodeScript.gameObjectParent = parentToBe;
+        //this should allow us to assign to its nodescript.parent at a later time
+        node.astNodeScript = nodeScript;
+        //this should allow us to identify nodes and gameobjects together
+        nodeScript.node = node;
+
 
         //change the object's transform
         //store parent and parent's partner in grandparent
@@ -311,7 +317,8 @@ public class ShuntingYardParser
         {
             parentNodeScript.leftGameObjectChild = nodePrefab;
         }
-        else if (node.isRight) {
+        else if (node.isRight) 
+        {
             parentNodeScript.rightGameObjectChild = nodePrefab;
         }
 
@@ -328,12 +335,16 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isRight)
                 {
+                    localShiftNodeLocation--;
                     parentToBe.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                    
                 }
                 else if (nodeScript.node.isLeft)
                 {
+                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+
                 }
             }
             else if (parentNodeScript.node.isRight)
@@ -344,12 +355,16 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isLeft)
                 {
+                    localShiftNodeLocation--;
                     parentToBe.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                    
                 }
                 else if (nodeScript.node.isRight)
                 {
+                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                    
                 }
             }
             else //if parent is the root 
@@ -360,11 +375,15 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isLeft)
                 {
+                    localShiftNodeLocation--;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                    
                 }
                 else if (nodeScript.node.isRight)
                 {
+                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                    
                 }
             }
         }
@@ -376,11 +395,15 @@ public class ShuntingYardParser
 
             if (nodeScript.node.isLeft)
             {
+                localShiftNodeLocation--;
                 nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                
             }
             else if (nodeScript.node.isRight)
             {
+                localShiftNodeLocation++;
                 nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
+                
             }
         }
         
@@ -388,12 +411,16 @@ public class ShuntingYardParser
         //Recurse through the left and right children of the newly instantiated node
         if (node.getLeftASTNode() != null)
         {
-            DrawAST2(node.getLeftASTNode(), nodePrefab);
+            DrawAST2(node.getLeftASTNode(), nodePrefab, localShiftNodeLocation);
         }
 
         if (node.getRightASTNode() != null)
         {
-            DrawAST2(node.getRightASTNode(), nodePrefab);
+            DrawAST2(node.getRightASTNode(), nodePrefab, localShiftNodeLocation);
+        }
+
+        if (nodePrefab.transform.parent.gameObject.name.Equals("Node(Clone)")) { 
+            
         }
 
         return;
