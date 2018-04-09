@@ -10,13 +10,14 @@ using System;
 public class Parser : MonoBehaviour
 {
     public string input = "Hello World";
+    public List<GameObject> nodeObjects = new List<GameObject>();
     string myString2 = "Yo";
     //bool groupEnabled;
     //bool myBool = true;
     //bool button;
     //float myFloat = 1.23f;
     char[] charArray;
-    //int treeHeight = 0;
+    public int gameObjectTreeHeight = 0;
 
     void Awake()
     {
@@ -45,8 +46,11 @@ public class Parser : MonoBehaviour
 
         //parser.DrawAST(parseTree, treeTop, false, false);
         parser.designateHierarchy(parseTree, false, false);
-        parser.DrawAST2(parseTree, treeTop, 0);
-
+        //parser.DrawAST2(parseTree, treeTop, 0);
+        parser.DrawAST3(parseTree, treeTop, nodeObjects, 0, 0, "0");
+        //parser.DrawASTTemplate(5, treeTop, nodeObjects, true, true);
+        gameObjectTreeHeight = parser.GetHeight(nodeObjects);
+        parser.DrawASTTemplate2(nodeObjects, gameObjectTreeHeight);
 
     }
 }
@@ -160,8 +164,8 @@ public class ASTNode
 
 public class ShuntingYardParser
 {
-    int treeHeight = 0;
     private Dictionary<char, IMyOperator> operators;
+    
 
     private static void AddNode(Stack<ASTNode> stack, char myOperator)
     {
@@ -335,16 +339,18 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isRight)
                 {
-                    localShiftNodeLocation--;
-                    parentToBe.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
+
+                    nodeScript.gameObjectPartner = parentNodeScript.leftGameObjectChild;
+                    parentNodeScript.leftGameObjectChild.GetComponent<NodeScript>().gameObjectPartner = nodeScript.gameObject;
+                    parentNodeScript.Shift(-1, parentNodeScript.gameObject);//which way would you shift the parent?
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                    
+                    nodeScript.gameObjectPartner.GetComponent<NodeScript>().Shift(1);
+
                 }
                 else if (nodeScript.node.isLeft)
                 {
-                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-
+                    parentNodeScript.Shift(-1, parentNodeScript.gameObject);
                 }
             }
             else if (parentNodeScript.node.isRight)
@@ -355,16 +361,18 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isLeft)
                 {
-                    localShiftNodeLocation--;
                     parentToBe.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y, parentToBe.transform.position.z);
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                    
+                    parentNodeScript.Shift(-1, parentNodeScript.gameObject);
                 }
                 else if (nodeScript.node.isRight)
                 {
-                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                    
+                    nodeScript.gameObjectPartner = parentNodeScript.leftGameObjectChild;
+                    parentNodeScript.leftGameObjectChild.GetComponent<NodeScript>().gameObjectPartner = nodeScript.gameObject;
+                    parentNodeScript.Shift(1, parentNodeScript.gameObject);
+                    nodeScript.gameObjectPartner.GetComponent<NodeScript>().Shift(1);
+
                 }
             }
             else //if parent is the root 
@@ -375,36 +383,24 @@ public class ShuntingYardParser
 
                 if (nodeScript.node.isLeft)
                 {
-                    localShiftNodeLocation--;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                    
+                    parentNodeScript.Shift(-1, parentNodeScript.gameObject);
                 }
                 else if (nodeScript.node.isRight)
                 {
-                    localShiftNodeLocation++;
                     nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                    
+                    nodeScript.gameObjectPartner = parentNodeScript.leftGameObjectChild;
+                    parentNodeScript.leftGameObjectChild.GetComponent<NodeScript>().gameObjectPartner = nodeScript.gameObject;
+                    parentNodeScript.Shift(1, parentNodeScript.gameObject);
+                    nodeScript.gameObjectPartner.GetComponent<NodeScript>().Shift(1);
+
                 }
             }
         }
-        else if(parentNodeScript.node == null){
-
+        else if(parentNodeScript.node == null){//if node is the root
             nodeScript.gameObjectPartner = null;
             nodeScript.leftGameObjectChild = null;
             nodeScript.rightGameObjectChild = null;
-
-            if (nodeScript.node.isLeft)
-            {
-                localShiftNodeLocation--;
-                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x - 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                
-            }
-            else if (nodeScript.node.isRight)
-            {
-                localShiftNodeLocation++;
-                nodePrefab.transform.position = new Vector3(parentToBe.transform.position.x + 1, parentToBe.transform.position.y + 1, parentToBe.transform.position.z);
-                
-            }
         }
         
 
@@ -425,8 +421,164 @@ public class ShuntingYardParser
 
         return;
     }
-
     
+    internal int GetHeight(List<GameObject> nodeObjects) {
+        int height = 0;
+        for (int i = 0; i < nodeObjects.Count; i++) {
+            NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+            if (nodeScript.path.Length > height) {
+                height = nodeScript.path.Length;
+            }
+        }
+        return height; 
+    }
+
+    internal void DrawAST3(ASTNode node, GameObject parentToBe, List<GameObject> nodeObjects, int shiftNodeLocation, int height, string path)
+    {
+        int localShiftNodeLocation = shiftNodeLocation;
+
+        GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/NodeText"));
+        //nodePrefab.transform.SetParent(parentToBe.transform);
+        nodePrefab.transform.SetParent(GameObject.Find("Tree").transform);
+        nodeObjects.Add(nodePrefab);
+        //nodePrefab.SetActive(false);
+
+        //assign ASTNode values to GameObject<NodeScript> values
+        NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
+        nodeScript.gameObjectParent = parentToBe;
+        nodeScript.height = height;
+        nodeScript.path = path;
+        
+        //this should allow us to assign to its nodescript.parent at a later time
+        node.astNodeScript = nodeScript;
+        //this should allow us to identify nodes and gameobjects together
+        nodeScript.node = node;
+
+        //change the object's transform
+        //store parent and parent's partner in grandparent
+        NodeScript parentNodeScript = parentToBe.GetComponent<NodeScript>();
+        if (node.isLeft)
+        {
+            parentNodeScript.leftGameObjectChild = nodePrefab;
+        }
+        else if (node.isRight)
+        {
+            parentNodeScript.rightGameObjectChild = nodePrefab;
+        }
+
+        nodeScript.leftGameObjectChild = null;
+        nodeScript.rightGameObjectChild = null;
+
+        if (nodeScript.node.isRight)
+        {
+            //set right's partner as left
+            nodeScript.gameObjectPartner = parentNodeScript.leftGameObjectChild;
+            //set left's partner as right
+            parentNodeScript.leftGameObjectChild.GetComponent<NodeScript>().gameObjectPartner = nodeScript.gameObject;
+        }
+        else if (nodeScript.node.isLeft)
+        {
+            //right wouldn't be instantiated yet, so we'll set partners on right nodes only (in which case the left is already instantiated)
+        }
+
+        //Recurse through the left and right children of the newly instantiated node
+        height++;
+        if (node.getLeftASTNode() != null)
+        {
+            //0 for left
+            DrawAST3(node.getLeftASTNode(), nodePrefab, nodeObjects, localShiftNodeLocation, height, nodeScript.path + "0");
+        }
+
+        if (node.getRightASTNode() != null)
+        {
+            //1 for right
+            DrawAST3(node.getRightASTNode(), nodePrefab, nodeObjects, localShiftNodeLocation, height, nodeScript.path + "1");
+        }
+
+        //if (nodePrefab.transform.parent.gameObject.name.Equals("Node(Clone)"))
+        //{
+
+        //}
+
+        return;
+    }
+
+    /* This method will draw the template for us, we will then insert the values of the tree generated in DrawAST 
+     * 
+     */
+    internal void DrawASTTemplate(int depth, GameObject parentToBe, List<GameObject> nodeObjects, bool hasLeft, bool hasRight, string path) {
+        if (depth > 0) {
+            depth--;
+            GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/NodeText"));
+            nodePrefab.transform.SetParent(parentToBe.transform);
+            nodePrefab.SetActive(false);
+
+            NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
+            nodeScript.path = path;
+
+            if (hasLeft)
+            {                
+                DrawASTTemplate(depth, nodePrefab, nodeObjects, true, true, path + "0");
+            }
+            if (hasRight) 
+            {
+                DrawASTTemplate(depth, nodePrefab, nodeObjects, true, true, path + "1");
+            }
+
+            nodeObjects.Add(nodePrefab); 
+        }
+
+    }
+
+    /*This method will take in the nodeObject list, iterate through it, and output it in levels
+     * 
+     */
+    internal void DrawASTTemplate2(List<GameObject> nodeObjects, int depth) {
+        int pathLength = depth;
+        int y = 0;
+        int x = 0;
+        //this will draw the node with the longest paths first
+        for (int j = pathLength; j >= 0; j--) {            
+            for (int i = 0; i < nodeObjects.Count; i++)
+            {
+                NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+                if (nodeScript.path.Length == j)
+                {
+                    //Debug.Log(j + ":" + i);
+                    GameObject myObject = nodeScript.gameObject;
+                    Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+                    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(pos.x + x, pos.y + y, pos.z);
+                    x = x+200;
+                }                
+            }
+            y=y+200;
+            x = 0;
+        }
+
+        //pathLength-1 since we'd be using the positions of the leaves that became adjusted above
+        //J > 0 too since we really start with length of 1 at the root
+        for (int j = pathLength-1; j > 0; j--) {
+            for (int i = 0; i < nodeObjects.Count; i++) {
+                NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+                if (nodeScript.path.Length == j) {
+                    GameObject myObject = nodeScript.gameObject;
+                    if (nodeScript.leftGameObjectChild != null) {
+                        GameObject leftObject = nodeScript.leftGameObjectChild;
+                        GameObject rightObject = nodeScript.rightGameObjectChild;
+                        Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+                        Vector3 leftPos = leftObject.GetComponent<RectTransform>().anchoredPosition;
+                        Vector3 rightPos = rightObject.GetComponent<RectTransform>().anchoredPosition;
+                        float midX = (rightPos.x - leftPos.x) / 2.0f + leftPos.x;
+                        myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(midX, pos.y, pos.z);
+                    }
+                }
+            }
+        }
+
+    }
+
+
+
 }
 
 
