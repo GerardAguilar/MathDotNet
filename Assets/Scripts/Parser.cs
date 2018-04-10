@@ -555,8 +555,21 @@ public class ShuntingYardParser
             x = 0;
         }
 
+        //change the bottom leaves here where j=pathLength;
+        for (int i = 0; i < nodeObjects.Count; i++)
+        { 
+            NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+            if (nodeScript.path.Length == pathLength) {
+                int temp = Convert.ToInt32(nodeScript.path, 2);
+                GameObject myObject = nodeScript.gameObject;
+                Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+                myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(temp*200, pos.y, pos.z);
+            }
+        }
+
         //pathLength-1 since we'd be using the positions of the leaves that became adjusted above
         //J > 0 too since we really start with length of 1 at the root
+        //change the rest of the branches
         for (int j = pathLength-1; j > 0; j--) {
             for (int i = 0; i < nodeObjects.Count; i++) {
                 NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
@@ -574,6 +587,8 @@ public class ShuntingYardParser
                 }
             }
         }
+
+        //how to accomodate leaves that are not at the deepest?
 
     }
 
