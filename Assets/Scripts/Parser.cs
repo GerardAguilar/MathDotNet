@@ -503,33 +503,6 @@ public class ShuntingYardParser
         return;
     }
 
-    /* This method will draw the template for us, we will then insert the values of the tree generated in DrawAST 
-     * 
-     */
-    internal void DrawASTTemplate(int depth, GameObject parentToBe, List<GameObject> nodeObjects, bool hasLeft, bool hasRight, string path) {
-        if (depth > 0) {
-            depth--;
-            GameObject nodePrefab = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/NodeText"));
-            nodePrefab.transform.SetParent(parentToBe.transform);
-            nodePrefab.SetActive(false);
-
-            NodeScript nodeScript = nodePrefab.GetComponent<NodeScript>();
-            nodeScript.path = path;
-
-            if (hasLeft)
-            {                
-                DrawASTTemplate(depth, nodePrefab, nodeObjects, true, true, path + "0");
-            }
-            if (hasRight) 
-            {
-                DrawASTTemplate(depth, nodePrefab, nodeObjects, true, true, path + "1");
-            }
-
-            nodeObjects.Add(nodePrefab); 
-        }
-
-    }
-
     /*This method will take in the nodeObject list, iterate through it, and output it in levels
      * 
      */
@@ -538,44 +511,75 @@ public class ShuntingYardParser
         int y = 0;
         int x = 0;
         //this will draw the node with the longest paths first
-        for (int j = pathLength; j >= 0; j--) {            
+        //for (int j = pathLength; j >= 0; j--) {            
+        //    for (int i = 0; i < nodeObjects.Count; i++)
+        //    {
+        //        NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+        //        if (nodeScript.path.Length == j)
+        //        {
+        //            //Debug.Log(j + ":" + i);
+        //            GameObject myObject = nodeScript.gameObject;
+        //            Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+        //            myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(pos.x + x, pos.y + y, pos.z);
+        //            x = x+200;
+        //        }                
+        //    }
+        //    y=y+200;
+        //    x = 0;
+        //}
+
+        ////change the bottom leaves here where j=pathLength;
+        //for (int i = 0; i < nodeObjects.Count; i++)
+        //{ 
+        //    NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+        //    if (nodeScript.path.Length == pathLength) {
+        //        int temp = Convert.ToInt32(nodeScript.path, 2);
+        //        GameObject myObject = nodeScript.gameObject;
+        //        Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+        //        myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(temp*200, pos.y, pos.z);
+        //    }
+        //}
+
+        //pathLength-1 since we'd be using the positions of the leaves that became adjusted above
+        //J > 0 too since we really start with length of 1 at the root
+        //change the rest of the branches
+        for (int j = pathLength; j > 0; j--) {
+            for (int i = 0; i < nodeObjects.Count; i++) {
+                NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+                if (nodeScript.path.Length == j) {
+                    GameObject myObject = nodeScript.gameObject;
+                    int temp = Convert.ToInt32(nodeScript.path, 2);
+                    //if (nodeScript.leftGameObjectChild != null)
+                    //{
+                    //    GameObject leftObject = nodeScript.leftGameObjectChild;
+                    //    GameObject rightObject = nodeScript.rightGameObjectChild;
+                    //    Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+                    //    Vector3 leftPos = leftObject.GetComponent<RectTransform>().anchoredPosition;
+                    //    Vector3 rightPos = rightObject.GetComponent<RectTransform>().anchoredPosition;
+                    //    float midX = (rightPos.x - leftPos.x) / 2.0f + leftPos.x;
+                    //    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(midX, pos.y, pos.z);
+                    //}
+                    //else { 
+
+                    //}
+                    Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
+                    float leftShiftedX = (temp*200) - ((Mathf.Pow(2,j)/4)*200);
+                    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, -j*300, pos.z);
+                }
+            }
+        }
+
+        //shifts parents to middle of children
+        for (int j = pathLength; j > 0; j--)
+        {
             for (int i = 0; i < nodeObjects.Count; i++)
             {
                 NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
                 if (nodeScript.path.Length == j)
                 {
-                    //Debug.Log(j + ":" + i);
                     GameObject myObject = nodeScript.gameObject;
-                    Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
-                    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(pos.x + x, pos.y + y, pos.z);
-                    x = x+200;
-                }                
-            }
-            y=y+200;
-            x = 0;
-        }
-
-        //change the bottom leaves here where j=pathLength;
-        for (int i = 0; i < nodeObjects.Count; i++)
-        { 
-            NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
-            if (nodeScript.path.Length == pathLength) {
-                int temp = Convert.ToInt32(nodeScript.path, 2);
-                GameObject myObject = nodeScript.gameObject;
-                Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
-                myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(temp*200, pos.y, pos.z);
-            }
-        }
-
-        //pathLength-1 since we'd be using the positions of the leaves that became adjusted above
-        //J > 0 too since we really start with length of 1 at the root
-        //change the rest of the branches
-        for (int j = pathLength-1; j > 0; j--) {
-            for (int i = 0; i < nodeObjects.Count; i++) {
-                NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
-                if (nodeScript.path.Length == j) {
-                    GameObject myObject = nodeScript.gameObject;
-                    if (nodeScript.leftGameObjectChild != null) {
+                    if (nodeScript.leftGameObjectChild != null)
+                    {
                         GameObject leftObject = nodeScript.leftGameObjectChild;
                         GameObject rightObject = nodeScript.rightGameObjectChild;
                         Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
@@ -588,7 +592,13 @@ public class ShuntingYardParser
             }
         }
 
-        //how to accomodate leaves that are not at the deepest?
+        //attach lines to parents
+        //for (int i = 0; i < nodeObjects.Count; i++) 
+        //{
+        //    NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+        //    Vector3 anchoredPos = nodeScript.gameObjectParent.GetComponent<RectTransform>().anchoredPosition;
+        //    nodeScript.GenerateLine(anchoredPos);
+        //}
 
     }
 

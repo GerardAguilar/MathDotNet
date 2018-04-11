@@ -14,6 +14,12 @@ public class NodeScript : MonoBehaviour {
     public GameObject gameObjectPartner;
     public GameObject leftGameObjectChild;
     public GameObject rightGameObjectChild;
+    public LineRenderer lineRenderer;
+
+    //public void Awake()
+    //{
+    //    lineRenderer = GetComponentInChildren<LineRenderer>();
+    //}
 
     public void Start()
     {
@@ -31,7 +37,8 @@ public class NodeScript : MonoBehaviour {
         Debug.Log("New position: " + transform.position.ToString());
     }
 
-    public void Shift(int steps, GameObject tempObject) {
+    public void Shift(int steps, GameObject tempObject) 
+    {
         //steps = steps * 200;
         //Vector3 tempPosition = transform.position;
         //transform.position = new Vector3(tempPosition.x + steps, tempPosition.y, tempPosition.z);
@@ -40,6 +47,14 @@ public class NodeScript : MonoBehaviour {
         //    Shift(steps, tempObject.transform.parent.gameObject);
         //}        
         Shift(steps);
+    }
+
+    public void GenerateLine(Vector3 trans)
+    {
+        lineRenderer = GetComponentInChildren<LineRenderer>();
+
+        lineRenderer.SetPosition(0, this.transform.GetComponent<RectTransform>().anchoredPosition);
+        lineRenderer.SetPosition(1, trans);
     }
 }
 
