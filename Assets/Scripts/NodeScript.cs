@@ -49,12 +49,22 @@ public class NodeScript : MonoBehaviour {
         Shift(steps);
     }
 
-    public void GenerateLine(Vector3 trans)
+    public void GenerateLine(Vector3 nodeParentLocation)
     {
         lineRenderer = GetComponentInChildren<LineRenderer>();
 
-        lineRenderer.SetPosition(0, this.transform.GetComponent<RectTransform>().anchoredPosition);
-        lineRenderer.SetPosition(1, trans);
+        //we're dealing with two parents, the node parent and the transform parent
+        RectTransform tempRect = gameObject.GetComponent<RectTransform>();
+        float transformParentHorizontalDistance = tempRect.anchoredPosition.x;
+        float nodeParentHorizontalDistance = nodeParentLocation.x;
+        float horizontalDistance = nodeParentHorizontalDistance - transformParentHorizontalDistance;
+
+        float transformParentVerticalDistance = tempRect.anchoredPosition.y;    
+        float nodeParentVerticalDistance = nodeParentLocation.y;
+        float verticalDistance = nodeParentVerticalDistance - transformParentVerticalDistance;
+
+        lineRenderer.SetPosition(0, new Vector3 (0f,0f,0f));
+        lineRenderer.SetPosition(1, new Vector3 (horizontalDistance,verticalDistance,0f));
     }
 }
 

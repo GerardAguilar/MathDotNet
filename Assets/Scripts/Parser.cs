@@ -540,7 +540,6 @@ public class ShuntingYardParser
         //    }
         //}
 
-        //pathLength-1 since we'd be using the positions of the leaves that became adjusted above
         //J > 0 too since we really start with length of 1 at the root
         //change the rest of the branches
         for (int j = pathLength; j > 0; j--) {
@@ -593,12 +592,12 @@ public class ShuntingYardParser
         }
 
         //attach lines to parents
-        //for (int i = 0; i < nodeObjects.Count; i++) 
-        //{
-        //    NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
-        //    Vector3 anchoredPos = nodeScript.gameObjectParent.GetComponent<RectTransform>().anchoredPosition;
-        //    nodeScript.GenerateLine(anchoredPos);
-        //}
+        for (int i = 0; i < nodeObjects.Count; i++)
+        {
+            NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
+            Vector3 anchoredPos = nodeScript.gameObjectParent.GetComponent<RectTransform>().anchoredPosition;
+            nodeScript.GenerateLine(anchoredPos);
+        }
 
     }
 
