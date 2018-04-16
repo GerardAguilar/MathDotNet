@@ -150,6 +150,10 @@ public class ASTNode
         return this.value;
     }
 
+    public void setValue(char val){
+        this.value = val;
+    }
+
     public ASTNode getLeftASTNode()
     {
         return this.astNodeLeftChild;

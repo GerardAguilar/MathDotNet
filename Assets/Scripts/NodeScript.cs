@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +26,7 @@ public class NodeScript : MonoBehaviour {
     {
         if (!gameObject.name.Equals("Tree"))
         {
+            //GetComponentInChildren<Text>().text = node.getValue() + "";
             GetComponent<Text>().text = node.getValue() + "";
         }
     }
@@ -65,6 +67,101 @@ public class NodeScript : MonoBehaviour {
 
         lineRenderer.SetPosition(0, new Vector3 (0f,0f,0f));
         lineRenderer.SetPosition(1, new Vector3 (horizontalDistance,verticalDistance,0f));
+    }
+
+    public bool CheckIfOperation() 
+    {
+        char character = node.getValue();
+        bool itsAnOp = false;
+        switch (character) {
+            case '+':
+                itsAnOp = true;
+                break;
+            case '-':
+                itsAnOp = true;
+                break;
+            case '*':
+                itsAnOp = true;
+                break;
+            case '/':
+                itsAnOp = true;
+                break;            
+            case '^':
+                itsAnOp = true;
+                break;
+            default:
+                itsAnOp = false;
+                break;
+        }
+
+        return itsAnOp;
+    }
+
+    public bool CheckIfBothLeaves() 
+    {
+        ASTNode leftChild = node.getLeftASTNode();
+        ASTNode rightChild = node.getRightASTNode();
+
+        ASTNode leftsLeftChild = leftChild.getLeftASTNode();
+        ASTNode leftsRightChild = leftChild.getRightASTNode();
+        ASTNode rightsLeftChild = rightChild.getLeftASTNode();
+        ASTNode rightsRightChild = rightChild.getRightASTNode();
+
+        bool bothAreLeaves = false;
+
+        if (leftsLeftChild == null
+            && leftsRightChild == null
+            && rightsLeftChild == null
+            && rightsRightChild == null) 
+        {
+            bothAreLeaves = true;
+        }
+
+        return bothAreLeaves;
+        
+    }
+
+    public void Solve()
+    {
+        Console.WriteLine("nodeScript..SOlve()");
+        if (this.CheckIfOperation())
+        {
+            if (this.CheckIfBothLeaves())
+            {
+                string temp = this.RunOperation();
+                Debug.Log("nodeScript.Solve() = " + temp);
+                this.node.setValue(temp[0]);
+            }
+        }
+    }
+
+    //TODO: need to account for long formatted floats and values like 1/3
+    //TODO: Need to change nodeScript/ASTNode value as string, not char
+    public string RunOperation() {
+        string solution = "<empty>";
+        string leftVal = node.getLeftASTNode().getValue() +"";
+        string rightVal = node.getRightASTNode().getValue() +"";
+        char op = node.getValue();
+
+        switch (op) {
+            case '+':
+                solution = (float.Parse(leftVal) + float.Parse(rightVal)) + "";
+                break;
+            case '-':
+                solution = (float.Parse(leftVal) - float.Parse(rightVal)) + "";
+                break;
+            case '*':
+                solution = (float.Parse(leftVal) * float.Parse(rightVal)) + "";
+                break;
+            case '/':
+                solution = (float.Parse(leftVal) / float.Parse(rightVal)) + "";
+                break;
+            case '^':
+                solution = Mathf.Pow(float.Parse(leftVal), float.Parse(rightVal)) + "";
+                break;
+        }
+
+        return solution;
     }
 }
 
