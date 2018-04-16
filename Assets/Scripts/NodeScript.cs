@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
@@ -16,6 +17,7 @@ public class NodeScript : MonoBehaviour {
     public GameObject leftGameObjectChild;
     public GameObject rightGameObjectChild;
     public LineRenderer lineRenderer;
+    Text myText;
 
     //public void Awake()
     //{
@@ -24,10 +26,16 @@ public class NodeScript : MonoBehaviour {
 
     public void Start()
     {
-        if (!gameObject.name.Equals("Tree"))
+        //GetComponentInChildren<Text>().text = node.getValue() + "";
+        myText = GetComponent<Text>(); 
+        
+    }
+
+    public void Update()
+    {
+        if (!gameObject.name.Equals("Tree")) 
         {
-            //GetComponentInChildren<Text>().text = node.getValue() + "";
-            GetComponent<Text>().text = node.getValue() + "";
+            myText.text = node.getValue() + "";
         }
     }
 
@@ -71,22 +79,23 @@ public class NodeScript : MonoBehaviour {
 
     public bool CheckIfOperation() 
     {
-        char character = node.getValue();
+        
+        string character = node.getValue();
         bool itsAnOp = false;
         switch (character) {
-            case '+':
+            case "+":
                 itsAnOp = true;
                 break;
-            case '-':
+            case "-":
                 itsAnOp = true;
                 break;
-            case '*':
+            case "*":
                 itsAnOp = true;
                 break;
-            case '/':
+            case "/":
                 itsAnOp = true;
                 break;            
-            case '^':
+            case "^":
                 itsAnOp = true;
                 break;
             default:
@@ -123,16 +132,21 @@ public class NodeScript : MonoBehaviour {
 
     public void Solve()
     {
-        Console.WriteLine("nodeScript..SOlve()");
+        Console.WriteLine("nodeScript.Solve()");
         if (this.CheckIfOperation())
         {
             if (this.CheckIfBothLeaves())
             {
+                ASTNode leftChild = node.getLeftASTNode();
+                ASTNode rightChild = node.getRightASTNode();
                 string temp = this.RunOperation();
                 Debug.Log("nodeScript.Solve() = " + temp);
-                this.node.setValue(temp[0]);
+                this.node.setValue(temp);
+                this.leftGameObjectChild.SetActive(false);
+                this.rightGameObjectChild.SetActive(false);
             }
         }
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     //TODO: need to account for long formatted floats and values like 1/3
@@ -141,22 +155,22 @@ public class NodeScript : MonoBehaviour {
         string solution = "<empty>";
         string leftVal = node.getLeftASTNode().getValue() +"";
         string rightVal = node.getRightASTNode().getValue() +"";
-        char op = node.getValue();
+        string op = node.getValue();
 
         switch (op) {
-            case '+':
+            case "+":
                 solution = (float.Parse(leftVal) + float.Parse(rightVal)) + "";
                 break;
-            case '-':
+            case "-":
                 solution = (float.Parse(leftVal) - float.Parse(rightVal)) + "";
                 break;
-            case '*':
+            case "*":
                 solution = (float.Parse(leftVal) * float.Parse(rightVal)) + "";
                 break;
-            case '/':
+            case "/":
                 solution = (float.Parse(leftVal) / float.Parse(rightVal)) + "";
                 break;
-            case '^':
+            case "^":
                 solution = Mathf.Pow(float.Parse(leftVal), float.Parse(rightVal)) + "";
                 break;
         }

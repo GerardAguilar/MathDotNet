@@ -127,9 +127,48 @@ public class MyBaseOperator : IMyOperator
 /// ASTNode should store all of the node's actual information, it should also be able to link to it's own gameobject
 /// value, leftASTNode, rightASTNode
 /// </summary>
+//public class ASTNode
+//{
+//    private char value;
+//    public ASTNode astNodeParent;
+//    public ASTNode astNodePartner;
+//    public ASTNode astNodeLeftChild;
+//    public ASTNode astNodeRightChild;
+//    public NodeScript astNodeScript;
+//    public bool isLeft;
+//    public bool isRight;
+
+//    public ASTNode(char value, ASTNode leftASTNode, ASTNode rightASTNode)
+//    {
+//        this.value = value;
+//        this.astNodeLeftChild = leftASTNode;
+//        this.astNodeRightChild = rightASTNode;
+//    }
+
+//    public char getValue()
+//    {
+//        return this.value;
+//    }
+
+//    public void setValue(char val){
+//        this.value = val;
+//    }
+
+//    public ASTNode getLeftASTNode()
+//    {
+//        return this.astNodeLeftChild;
+//    }
+
+//    public ASTNode getRightASTNode()
+//    {
+//        return this.astNodeRightChild;
+//    }
+
+//}
+
 public class ASTNode
 {
-    private char value;
+    private string value;
     public ASTNode astNodeParent;
     public ASTNode astNodePartner;
     public ASTNode astNodeLeftChild;
@@ -138,19 +177,20 @@ public class ASTNode
     public bool isLeft;
     public bool isRight;
 
-    public ASTNode(char value, ASTNode leftASTNode, ASTNode rightASTNode)
+    public ASTNode(string value, ASTNode leftASTNode, ASTNode rightASTNode)
     {
         this.value = value;
         this.astNodeLeftChild = leftASTNode;
         this.astNodeRightChild = rightASTNode;
     }
 
-    public char getValue()
+    public string getValue()
     {
         return this.value;
     }
 
-    public void setValue(char val){
+    public void setValue(string val)
+    {
         this.value = val;
     }
 
@@ -169,9 +209,9 @@ public class ASTNode
 public class ShuntingYardParser
 {
     private Dictionary<char, IMyOperator> operators;
-    
+    List<string> equationStringArray;
 
-    private static void AddNode(Stack<ASTNode> stack, char myOperator)
+    private static void AddNode(Stack<ASTNode> stack, string myOperator)
     {
         ASTNode rightASTNode = stack.Pop();
         ASTNode leftASTNode = stack.Pop();
@@ -187,28 +227,92 @@ public class ShuntingYardParser
         }
     }
 
+    public List<string> parseInputToEquationStringArray(string input) {
+        List<string> tempArray = new List<string>();
+        string tempString = "";
+        char[] chars = input.ToCharArray();
+        //foreach (char c in chars) {
+        for(int i=0; i<chars.Length; i++)
+        {
+            char c = chars[i];
+            switch (c)
+            {
+                case '(':
+                    //add the string of characters accumulated from default
+                    //tempArray.Add(tempString);
+                    //add the "("
+                    if (tempString.Length > 0)
+                    {
+                        tempArray.Add(tempString);
+                        tempString = "";
+                    }
+                    tempString = "(";
+                    tempArray.Add(tempString);
+                    //reset tempString
+                    tempString = "";
+                    break;
+                case ')':
+                    if (tempString.Length > 0)
+                    {
+                        tempArray.Add(tempString);
+                    }
+                    tempString = ")";
+                    tempArray.Add(tempString);
+                    tempString = "";
+                    break;
+                //' ' case should be after a string of characters accumulated from default
+                case ' ':
+                    if (tempString.Length > 0) 
+                    {
+                        tempArray.Add(tempString);
+                        tempString = "";
+                    }                    
+                    break;
+                case '\0':
+                    if (tempString.Length > 0)
+                    {
+                        tempArray.Add(tempString);
+                        tempString = "";
+                    }
+                    break;
+                default:
+                    tempString = tempString + c;
+                    if (i == chars.Length - 1) {
+                        tempArray.Add(tempString);
+                        tempString = "";
+                    }
+                    break;
+            }
+        }
+
+        return tempArray;
+    }
+
     public ASTNode ConvertInfixNotationToAST(string input)
     {
         Stack<char> operatorStack = new Stack<char>();
         Stack<ASTNode> operandStack = new Stack<ASTNode>();
+        //need to change input to an array of strings instead, maybe use a custom split
+        equationStringArray = parseInputToEquationStringArray(input);
         char[] chars = input.ToCharArray();
 
-        foreach (char c in chars)
+        //foreach (char c in chars)
+        foreach(string c in equationStringArray)
         {
-            char popped;
+            string popped;
             //main://used by goto - transferred over from Java labelled breaks - causes infinite loopingf
             switch (c)
             {
-                case ' ':
+                case " ":
                     break;
-                case '(':
+                case "(":
                     operatorStack.Push('(');
                     break;
-                case ')':
+                case ")":
                     while (!(operatorStack.Count == 0))
                     {//stack is not empty
-                        popped = operatorStack.Pop();
-                        if ('(' == popped)
+                        popped = operatorStack.Pop() +"";
+                        if ("(" == popped)
                         {
                             //goto main;
                             break;
@@ -221,10 +325,13 @@ public class ShuntingYardParser
                     }
                     break;
                 default:
-                    if (operators.ContainsKey(c))
-                    {
+                    //if (operators.ContainsKey(c))
+                    Debug.Log(">_" + c + "_<");
+                    char possibleOp = c.Substring(0, 1)[0];
+                    if (operators.ContainsKey(possibleOp))
+                    {                        
                         IMyOperator o1;
-                        operators.TryGetValue(c, out o1);
+                        operators.TryGetValue(possibleOp, out o1);
                         IMyOperator o2;
                         //while operatorStack is not empty and that the next operator in the operatorstack is a valid operator
                         while (!(operatorStack.Count == 0) && operators.TryGetValue(operatorStack.Peek(), out o2))
@@ -233,25 +340,27 @@ public class ShuntingYardParser
                             if (!o1.IsRightAssociative() && 0 == o1.ComparePrecedence(o2) || o1.ComparePrecedence(o2) < 0)//this condition needs to be modified, because it assumes that the 3rd and up operations have no say in precedence. Example 1 + 2 * 3 ^ 2
                             {
                                 operatorStack.Pop();
-                                AddNode(operandStack, o2.GetSymbol());
+                                AddNode(operandStack, o2.GetSymbol() + "");
                             }
                             else
                             {
                                 break;
                             }
                         }
-                        operatorStack.Push(c);
+                        operatorStack.Push(possibleOp);
                     }
+                    
                     else
                     {
                         operandStack.Push(new ASTNode(c, null, null));
                     }
+                    
                     break;
             }
         }
         while (!(operatorStack.Count == 0))
         {
-            AddNode(operandStack, operatorStack.Pop());
+            AddNode(operandStack, operatorStack.Pop()+"");
         }
         return operandStack.Pop();
     }
