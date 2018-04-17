@@ -39,6 +39,13 @@ public class NodeScript : MonoBehaviour {
         }
     }
 
+    public void DisableLeaves() {
+        this.node.astNodeLeftChild = null;
+        this.node.astNodeRightChild = null;
+        this.leftGameObjectChild.SetActive(false);
+        this.rightGameObjectChild.SetActive(false);
+    }
+
     public void Shift(int steps)
     {
         //steps = steps * 200;
@@ -142,8 +149,9 @@ public class NodeScript : MonoBehaviour {
                 string temp = this.RunOperation();
                 Debug.Log("nodeScript.Solve() = " + temp);
                 this.node.setValue(temp);
-                this.leftGameObjectChild.SetActive(false);
-                this.rightGameObjectChild.SetActive(false);
+                this.DisableLeaves();
+                //this.leftGameObjectChild.SetActive(false);
+                //this.rightGameObjectChild.SetActive(false);
             }
         }
         EventSystem.current.SetSelectedGameObject(null);

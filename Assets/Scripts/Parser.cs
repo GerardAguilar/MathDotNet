@@ -169,6 +169,7 @@ public class MyBaseOperator : IMyOperator
 public class ASTNode
 {
     private string value;
+    public bool positive;
     public ASTNode astNodeParent;
     public ASTNode astNodePartner;
     public ASTNode astNodeLeftChild;
@@ -182,6 +183,17 @@ public class ASTNode
         this.value = value;
         this.astNodeLeftChild = leftASTNode;
         this.astNodeRightChild = rightASTNode;
+        if (value.Length > 1)
+        {
+            if (value.Contains("-"))
+            {
+                positive = false;
+            }
+        }
+        else 
+        {
+            positive = true;
+        }
     }
 
     public string getValue()
@@ -192,6 +204,17 @@ public class ASTNode
     public void setValue(string val)
     {
         this.value = val;
+        if (val.Length > 1)
+        {
+            if (val.Contains("-"))
+            {
+                positive = false;
+            }
+        }
+        else
+        {
+            positive = true;
+        }
     }
 
     public ASTNode getLeftASTNode()
@@ -330,6 +353,10 @@ public class ShuntingYardParser
                     char possibleOp = c.Substring(0, 1)[0];
                     if (operators.ContainsKey(possibleOp))
                     {                        
+                        //this is the part where we make it so that -1 isn't the same as - 1
+                        //
+                        //
+
                         IMyOperator o1;
                         operators.TryGetValue(possibleOp, out o1);
                         IMyOperator o2;
