@@ -297,6 +297,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\BorderScript.cs" />
+    <Compile Include="Assets\BulletScript.cs" />
+    <Compile Include="Assets\EnemyScript.cs" />
+    <Compile Include="Assets\Player.cs" />
     <Compile Include="Assets\Scripts\ButtonScript.cs" />
     <Compile Include="Assets\Scripts\Manager.cs" />
     <Compile Include="Assets\Scripts\MathInput.cs" />

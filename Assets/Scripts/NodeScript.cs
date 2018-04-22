@@ -16,6 +16,7 @@ public class NodeScript : MonoBehaviour {
     public GameObject gameObjectPartner;
     public GameObject leftGameObjectChild;
     public GameObject rightGameObjectChild;
+
     public LineRenderer lineRenderer;
     Text myText;
 
@@ -24,16 +25,15 @@ public class NodeScript : MonoBehaviour {
     //    lineRenderer = GetComponentInChildren<LineRenderer>();
     //}
 
-    public void Start()
+    public void Awake()
     {
         //GetComponentInChildren<Text>().text = node.getValue() + "";
-        myText = GetComponent<Text>(); 
-        
+        myText = GetComponent<Text>();
     }
 
     public void Update()
     {
-        if (!gameObject.name.Equals("Tree")) 
+        if (!gameObject.name.Equals("Tree1") && !gameObject.name.Equals("Tree2")) 
         {
             myText.text = node.getValue() + "";
         }
@@ -111,6 +111,17 @@ public class NodeScript : MonoBehaviour {
         }
 
         return itsAnOp;
+    }
+
+    public string GetOperation() {
+        if (CheckIfOperation())
+        {
+            return node.getValue();
+        }
+        else {
+            return null;
+        }
+        
     }
 
     public bool CheckIfBothLeaves() 
