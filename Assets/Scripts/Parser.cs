@@ -78,6 +78,30 @@ public class Parser : MonoBehaviour
         return ns;
     }
 
+    public void UpdateLeaves(bool r, bool g, bool b, bool w) {
+        List<NodeScript> list = new List<NodeScript>();
+        list = FindLeaves();
+        for (int i = 0; i < list.Count; i++) {
+            list[i].DecreaseColorValues(r, g, b, w);
+            list[i].ColorSprites();
+        }
+    }
+
+    public List<NodeScript> FindLeaves() {
+        List<NodeScript> list = new List<NodeScript>();
+        for (int i = 0; i < nodeObjects.Count; i++) {
+            NodeScript ns = nodeObjects[i].GetComponent<NodeScript>();
+            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves()) {
+                NodeScript left = ns.leftGameObjectChild.GetComponent<NodeScript>();
+                NodeScript right = ns.rightGameObjectChild.GetComponent<NodeScript>();
+                list.Add(left);
+                list.Add(right);
+            }
+        }
+
+        return list;
+    }
+
 
     public void ClearTree()
     {
@@ -227,6 +251,8 @@ public class ShuntingYardParser
 {
     private Dictionary<char, IMyOperator> operators;
     List<string> equationStringArray;
+    float nodeInBetweenWidth = 150f;
+    float nodeInBetweenHeight = 250f;
 
     private static void AddNode(Stack<ASTNode> stack, string myOperator)
     {
@@ -530,8 +556,8 @@ public class ShuntingYardParser
                     int temp = Convert.ToInt32(nodeScript.path, 2);
 
                     Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
-                    float leftShiftedX = (temp*200) - ((Mathf.Pow(2,j)/4)*200);
-                    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, -j * 300, pos.z);
+                    float leftShiftedX = (temp*nodeInBetweenWidth) - ((Mathf.Pow(2,j)/4)* nodeInBetweenWidth);
+                    myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, -j * nodeInBetweenHeight, pos.z);
                     //myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, pos.y, -j * 300);
                 }
             }

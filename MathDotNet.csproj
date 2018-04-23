@@ -297,17 +297,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\BorderScript.cs" />
-    <Compile Include="Assets\BulletScript.cs" />
-    <Compile Include="Assets\EnemyScript.cs" />
-    <Compile Include="Assets\Player.cs" />
+    <Compile Include="Assets\LevelManagerScript.cs" />
+    <Compile Include="Assets\MenuScript.cs" />
+    <Compile Include="Assets\Scripts\BorderScript.cs" />
+    <Compile Include="Assets\Scripts\BulletScript.cs" />
     <Compile Include="Assets\Scripts\ButtonScript.cs" />
+    <Compile Include="Assets\Scripts\EnemyManagerScript.cs" />
+    <Compile Include="Assets\Scripts\EnemyScript.cs" />
     <Compile Include="Assets\Scripts\Manager.cs" />
     <Compile Include="Assets\Scripts\MathInput.cs" />
     <Compile Include="Assets\Scripts\MathWindow.cs" />
     <Compile Include="Assets\Scripts\NewBehaviourScript.cs" />
     <Compile Include="Assets\Scripts\NodeScript.cs" />
     <Compile Include="Assets\Scripts\Parser.cs" />
+    <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\PowerUpScript.cs" />
     <Compile Include="Assets\Scripts\Scrap.cs" />
     <Compile Include="Assets\test.cs" />
   </ItemGroup>

@@ -16,8 +16,14 @@ public class BorderScript : MonoBehaviour {
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("Projectile")) {
+        if (other.gameObject.CompareTag("Projectile"))
+        {
             other.gameObject.SetActive(false);
+        }
+        else if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Enemy")) 
+        {
+            Rigidbody rb = other.gameObject.GetComponent<Rigidbody>();
+            rb.velocity = new Vector3(0f, 0f, 0f);
         }
     }
 }

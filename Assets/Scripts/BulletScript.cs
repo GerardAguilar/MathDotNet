@@ -34,6 +34,7 @@ public class BulletScript : MonoBehaviour {
     private void OnEnable()
     {
         transform.position = nozzle.transform.position;
+        transform.rotation = nozzle.transform.rotation;
     }
 
     private void OnDisable()

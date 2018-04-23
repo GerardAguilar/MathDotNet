@@ -16,6 +16,20 @@ public class NodeScript : MonoBehaviour {
     public GameObject gameObjectPartner;
     public GameObject leftGameObjectChild;
     public GameObject rightGameObjectChild;
+    public bool r;
+    public bool g;
+    public bool b;
+    public bool w;
+    public int rValue;
+    public int gValue;
+    public int bValue;
+    public int wValue;
+
+
+    public SpriteRenderer redSprite;
+    public SpriteRenderer greenSprite;
+    public SpriteRenderer blueSprite;
+    public SpriteRenderer whiteSprite;
 
     public LineRenderer lineRenderer;
     Text myText;
@@ -29,6 +43,35 @@ public class NodeScript : MonoBehaviour {
     {
         //GetComponentInChildren<Text>().text = node.getValue() + "";
         myText = GetComponent<Text>();
+
+        if (!gameObject.name.Equals("Tree1")) {
+            Debug.Log(transform.GetChild(0).transform.childCount);
+            Debug.Log(transform.GetChild(0).GetChild(0).name);
+            Debug.Log(transform.GetChild(0).GetChild(1).name);
+            Debug.Log(transform.GetChild(0).GetChild(2).name);
+            Debug.Log(transform.GetChild(0).GetChild(3).name);
+
+            redSprite = transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>();
+            greenSprite = transform.GetChild(0).GetChild(1).GetComponent<SpriteRenderer>();
+            blueSprite = transform.GetChild(0).GetChild(2).GetComponent<SpriteRenderer>();
+            whiteSprite = transform.GetChild(0).GetChild(3).GetComponent<SpriteRenderer>();
+
+            redSprite.color = new Color(redSprite.color.r, redSprite.color.g, redSprite.color.b, 0f);
+            greenSprite.color = new Color(greenSprite.color.r, greenSprite.color.g, greenSprite.color.b, 0f);
+            blueSprite.color = new Color(blueSprite.color.r, blueSprite.color.g, blueSprite.color.b, 0f);
+            whiteSprite.color = new Color(whiteSprite.color.r, whiteSprite.color.g, whiteSprite.color.b, 0f);
+
+            rValue = 0;
+            gValue = 0;
+            bValue = 0;
+            wValue = 0;
+            
+
+            RandomizeColors();
+            ColorSprites();
+
+
+        }
     }
 
     public void Update()
@@ -36,6 +79,94 @@ public class NodeScript : MonoBehaviour {
         if (!gameObject.name.Equals("Tree1") && !gameObject.name.Equals("Tree2")) 
         {
             myText.text = node.getValue() + "";
+        }
+    }
+
+    void RandomizeColors() {
+        //designate attribute shards, with a always on
+        int rand;
+        rand = UnityEngine.Random.Range(0, 3);
+        if (rand == 0)
+        {
+            r = true;
+            rValue = 2;
+        }
+        rand = UnityEngine.Random.Range(0, 3);
+        if (rand == 1)
+        {
+            g = true;
+            gValue = 2;
+        }
+        rand = UnityEngine.Random.Range(0, 3);
+        if (rand == 2)
+        {
+            b = true;
+            bValue = 2;
+        }
+        //rand = UnityEngine.Random.Range(0, 3);
+        //if (rand == 3)
+        //{
+        //    a = true;
+        //}
+        w = true;
+        wValue = 2;
+    }
+
+    public bool AreAllColorValuesZeroOrLessOfMyChildren() {
+        bool allZeroOrLess = false;
+        NodeScript left = leftGameObjectChild.GetComponent<NodeScript>();
+        NodeScript right = rightGameObjectChild.GetComponent<NodeScript>();
+
+        if (left.AreAllColorValuesZeroOrLess() && right.AreAllColorValuesZeroOrLess()) {
+            allZeroOrLess = true;
+        }
+        return allZeroOrLess;
+    }
+
+    public bool AreAllColorValuesZeroOrLess() {
+        bool allZeroOrLess = false;
+        if ((rValue <= 0) && (gValue <= 0) && (bValue <= 0) && (wValue <= 0))
+        {
+            allZeroOrLess = true;
+        }
+        return allZeroOrLess;
+    }
+
+    public void DecreaseColorValues(bool rBool, bool gBool, bool bBool, bool wBool) {
+        if (rBool) {
+            rValue = rValue - 1;
+        }
+        if (gBool) {
+            gValue = gValue - 1;
+        }
+        if (bBool) {
+            bValue = bValue - 1;
+        }
+        if (wBool) {
+            wValue = wValue - 1;
+        }        
+    }
+
+    public void ColorSprites() {
+
+        if (r)
+        {
+            redSprite.color = new Color(redSprite.color.r, redSprite.color.g, redSprite.color.b, rValue * 50f);
+        }
+
+        if (g)
+        {
+            greenSprite.color = new Color(greenSprite.color.r, greenSprite.color.g, greenSprite.color.b, gValue * 50f);
+        }
+
+        if (b)
+        {
+            blueSprite.color = new Color(blueSprite.color.r, blueSprite.color.g, blueSprite.color.b, bValue * 50f);
+        }
+
+        if (w)
+        {
+            whiteSprite.color = new Color(whiteSprite.color.r, whiteSprite.color.g, whiteSprite.color.b, wValue * 50f);
         }
     }
 
@@ -85,8 +216,7 @@ public class NodeScript : MonoBehaviour {
     }
 
     public bool CheckIfOperation() 
-    {
-        
+    {        
         string character = node.getValue();
         bool itsAnOp = false;
         switch (character) {
@@ -109,7 +239,6 @@ public class NodeScript : MonoBehaviour {
                 itsAnOp = false;
                 break;
         }
-
         return itsAnOp;
     }
 
@@ -120,8 +249,7 @@ public class NodeScript : MonoBehaviour {
         }
         else {
             return null;
-        }
-        
+        }        
     }
 
     public bool CheckIfBothLeaves() 
@@ -143,9 +271,7 @@ public class NodeScript : MonoBehaviour {
         {
             bothAreLeaves = true;
         }
-
-        return bothAreLeaves;
-        
+        return bothAreLeaves;        
     }
 
     public void Solve()
