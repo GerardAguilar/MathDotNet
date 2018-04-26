@@ -404,3 +404,40 @@
 //bool button;
 //float myFloat = 1.23f;
 //char[] charArray;
+
+//void MoveWithAddForce() {
+//    if (Input.GetKeyDown(KeyCode.W)) {
+//        rb.AddForce(Vector3.forward * sensitivity);
+//    }
+//    if (Input.GetKeyDown(KeyCode.S)){
+//        rb.AddForce(Vector3.back * sensitivity);
+//    }
+//    if (Input.GetKeyDown(KeyCode.A)) {
+//        rb.AddForce(Vector3.left * sensitivity);
+//    }
+//    if (Input.GetKeyDown(KeyCode.D)) {
+//        rb.AddForce(Vector3.right * sensitivity);
+//    }
+//}
+
+//void MoveWithTranslate() {
+//    if (Input.GetKeyDown(KeyCode.W))
+//    {
+//        transform.Translate(Vector3.forward * sensitivity);            
+//    }
+//    if (Input.GetKeyDown(KeyCode.S))
+//    {
+//        transform.Translate(Vector3.back * sensitivity);
+
+//    }
+//    if (Input.GetKeyDown(KeyCode.A))
+//    {
+//        transform.Translate(Vector3.left * sensitivity);
+
+//    }
+//    if (Input.GetKeyDown(KeyCode.D))
+//    {
+//        transform.Translate(Vector3.right * sensitivity);
+
+//    }
+//}

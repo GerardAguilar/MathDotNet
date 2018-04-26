@@ -44,6 +44,10 @@ public class Player : MonoBehaviour {
     GameObject manager;
     public Parser parserScript;
 
+    bool moving;
+    bool meleeing;
+    bool shooting;
+
     // Use this for initialization
     void Awake () {
         parserScript = manager.GetComponent<Parser>();
@@ -103,7 +107,10 @@ public class Player : MonoBehaviour {
 	void Update () {
         //MoveWithAddForce();
         //MoveWithTranslate();
-        MoveWithMovePosition();
+        if (!meleeing) {
+            MoveWithMovePosition();
+
+        }
         Attacks();
         Shooting();
     }
@@ -123,55 +130,20 @@ public class Player : MonoBehaviour {
         }
     }
 
-    void MoveWithAddForce() {
-        if (Input.GetKeyDown(KeyCode.W)) {
-            rb.AddForce(Vector3.forward * sensitivity);
-        }
-        if (Input.GetKeyDown(KeyCode.S)){
-            rb.AddForce(Vector3.back * sensitivity);
-        }
-        if (Input.GetKeyDown(KeyCode.A)) {
-            rb.AddForce(Vector3.left * sensitivity);
-        }
-        if (Input.GetKeyDown(KeyCode.D)) {
-            rb.AddForce(Vector3.right * sensitivity);
-        }
-    }
-
-    void MoveWithTranslate() {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            transform.Translate(Vector3.forward * sensitivity);            
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            transform.Translate(Vector3.back * sensitivity);
-            
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            transform.Translate(Vector3.left * sensitivity);
-            
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            transform.Translate(Vector3.right * sensitivity);
-            
-        }
-    }
-
     void MoveWithMovePosition()
     {
         direction = Vector3.zero;
-
+        
         if (Input.GetKey(KeyCode.W))
         {
+            moving = true;
             direction = direction + Vector3.forward * sensitivity * Time.deltaTime;
             faceDirection = direction;
             transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime*100);
         }
         if (Input.GetKey(KeyCode.S))
         {
+            moving = true;
             direction = direction + Vector3.back * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
@@ -179,6 +151,7 @@ public class Player : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.A))
         {
+            moving = true;
             direction = direction + Vector3.left * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
@@ -186,6 +159,7 @@ public class Player : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.D))
         {
+            moving = true;
             direction = direction + Vector3.right * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
@@ -272,15 +246,20 @@ public class Player : MonoBehaviour {
     }
     void ShootGreen()
     {
+        //need a combo structure here
         if (Input.GetKey(KeyCode.J) && Time.time > nextFire)
         {
+            meleeing = true;
             nextFire = Time.time + fireRate;
             jbutton.Select();
-            Shoot(bulletPoolGreen);
+            //Shoot(bulletPoolGreen);
+            Punch();
             parserScript.UpdateLeaves(false, true, false, false);
         }
         else if (Input.GetKeyUp(KeyCode.J))
         {
+            meleeing = false;
+            RetractPunch();
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }

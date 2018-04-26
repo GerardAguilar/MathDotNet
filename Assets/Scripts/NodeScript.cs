@@ -270,8 +270,21 @@ public class NodeScript : MonoBehaviour {
             && rightsRightChild == null) 
         {
             bothAreLeaves = true;
+
         }
         return bothAreLeaves;        
+    }
+
+    public bool CheckIfNoChildren() {
+        bool noChildren = false;
+        ASTNode leftChild = node.getLeftASTNode();
+        ASTNode rightChild = node.getRightASTNode();
+
+        if (leftChild == null && rightChild == null) {
+            noChildren = true;
+        }
+        return noChildren;
+
     }
 
     public void Solve()

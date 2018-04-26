@@ -29,18 +29,19 @@ public class EnemyScript : MonoBehaviour {
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag.Equals("Projectile")) {
+            AskForLoot();
             gameObject.SetActive(false);
             other.gameObject.SetActive(false);
         }
     }
 
-    private void OnDisable()
+    private void AskForLoot()
     {
-        if (Random.Range(0, 10) > 7) {
+        if (Random.Range(0, 10) > 7)
+        {
             powerUp.SetActive(true);
             powerUp.transform.position = gameObject.transform.position;
             enemyManagerScript.RemoveEnemyFromList(this.gameObject);
         }
-        
     }
 }

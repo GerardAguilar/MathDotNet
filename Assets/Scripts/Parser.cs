@@ -91,11 +91,14 @@ public class Parser : MonoBehaviour
         List<NodeScript> list = new List<NodeScript>();
         for (int i = 0; i < nodeObjects.Count; i++) {
             NodeScript ns = nodeObjects[i].GetComponent<NodeScript>();
-            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves()) {
-                NodeScript left = ns.leftGameObjectChild.GetComponent<NodeScript>();
-                NodeScript right = ns.rightGameObjectChild.GetComponent<NodeScript>();
-                list.Add(left);
-                list.Add(right);
+            //if (ns.CheckIfOperation() && ns.CheckIfBothLeaves()) {
+            //    NodeScript left = ns.leftGameObjectChild.GetComponent<NodeScript>();
+            //    NodeScript right = ns.rightGameObjectChild.GetComponent<NodeScript>();
+            //    list.Add(left);
+            //    list.Add(right);
+            //}
+            if (ns.CheckIfNoChildren()) {
+                list.Add(ns);
             }
         }
 
