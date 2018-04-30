@@ -47,6 +47,10 @@ public class Player : MonoBehaviour {
     bool moving;
     bool meleeing;
     bool shooting;
+    public int comboCount;
+    public float comboStart;
+    public float comboNext;
+    private int maxCombo;
 
     // Use this for initialization
     void Awake () {
@@ -101,6 +105,10 @@ public class Player : MonoBehaviour {
         ibutton = GameObject.Find("IButton").GetComponent<Button>();
         obutton = GameObject.Find("OButton").GetComponent<Button>();
         pbutton = GameObject.Find("PButton").GetComponent<Button>();
+
+        comboStart = 0f;
+        comboNext = .5f;
+        maxCombo = 3;
     }
 	
 	// Update is called once per frame
@@ -169,24 +177,32 @@ public class Player : MonoBehaviour {
     }
 
     void Attacks() {
-        if (Input.GetKeyDown(KeyCode.X)) {
-            Punch();            
-        }
-        if (Input.GetKeyUp(KeyCode.X)) {
-            RetractPunch();
-        }
-        //if (Input.GetKeyDown(KeyCode.Z)) {
-        //    Punch2();
+        //if (Input.GetKeyDown(KeyCode.X)) {
+        //    Punch();            
         //}
-        //if (Input.GetKeyUp(KeyCode.Z))
-        //{
-        //    RetractPunch2();
+        //if (Input.GetKeyUp(KeyCode.X)) {
+        //    RetractPunch();
         //}
+        //MeleeCombo();
+
 
     }
 
-    void Punch() {
-        arm.transform.localScale = new Vector3(1f, 1f, 1f);
+    void Punch(int type) {
+        switch (type) {
+            case 1:
+                arm.transform.localScale = new Vector3(2f, 1f, 1f);
+                break;
+            case 2:
+                arm.transform.localScale = new Vector3(1f, 1f, 2f);
+                break;
+            case 3:
+                arm.transform.localScale = new Vector3(3f, 3f, 3f);
+                break;
+            default:
+                break;
+        }
+        
     }
 
     void RetractPunch() {
@@ -247,22 +263,62 @@ public class Player : MonoBehaviour {
     void ShootGreen()
     {
         //need a combo structure here
-        if (Input.GetKey(KeyCode.J) && Time.time > nextFire)
+        if (Input.GetKeyDown(KeyCode.J) && Time.time > nextFire)
         {
-            meleeing = true;
+            //meleeing = true;
             nextFire = Time.time + fireRate;
             jbutton.Select();
             //Shoot(bulletPoolGreen);
-            Punch();
+            //Punch();
+            MeleeCombo();
             parserScript.UpdateLeaves(false, true, false, false);
         }
         else if (Input.GetKeyUp(KeyCode.J))
         {
-            meleeing = false;
+            //meleeing = false;
             RetractPunch();
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }
+
+    void MeleeCombo() {
+
+        if (comboCount == 0)
+        {
+            comboCount++;
+            Debug.Log("MeleeCombo(): " + comboCount);
+            ComboStart();
+            Punch(1);
+        }
+        else if (comboCount == maxCombo) {
+            Punch(comboCount);
+            Debug.Log("MeleeCombo(): Max Combo");
+            comboCount = 0;
+        }
+        else if (comboCount >= 1)
+        {
+            if (Time.time <= comboStart + comboNext)
+            {
+                Debug.Log("MeleeCombo(): " + comboCount);
+                comboCount++;
+                comboStart = Time.time;
+                Punch(comboCount);
+            }
+            else
+            {
+                Debug.Log("MeleeCombo(): Reset");
+                comboCount = 0;
+                Punch(1);
+            }
+        }
+
+    }
+
+    void ComboStart() {
+        comboStart = Time.time;
+        
+    }
+
     void ShootBlue()
     {
         if (Input.GetKey(KeyCode.K) && Time.time > nextFire)
