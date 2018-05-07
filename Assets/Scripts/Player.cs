@@ -11,7 +11,7 @@ public class Player : MonoBehaviour {
     public int rotationSpeed;
     public Vector3 rot;
     Vector3 direction;
-    Vector3 faceDirection;
+    public Vector3 faceDirection;
     GameObject arm;
     List<GameObject> bulletPool;
     List<GameObject> bulletPoolAdd;
@@ -51,6 +51,15 @@ public class Player : MonoBehaviour {
     public float comboStart;
     public float comboNext;
     private int maxCombo;
+
+    Animator anim;
+
+    public List<String> runePool;
+    List<String> runeYCache;
+    List<String> runeUCache;
+    List<String> runeICache;
+    List<String> runeOCache;
+    List<String> runePCache;
 
     // Use this for initialization
     void Awake () {
@@ -107,8 +116,13 @@ public class Player : MonoBehaviour {
         pbutton = GameObject.Find("PButton").GetComponent<Button>();
 
         comboStart = 0f;
-        comboNext = .5f;
+        comboNext = .25f;
         maxCombo = 3;
+
+        anim = gameObject.GetComponent<Animator>();
+
+        AddToRuneCache(runeYCache, "^");
+        AddToRuneCache(runeYCache, "+");
     }
 	
 	// Update is called once per frame
@@ -117,11 +131,28 @@ public class Player : MonoBehaviour {
         //MoveWithTranslate();
         if (!meleeing) {
             MoveWithMovePosition();
-
         }
         Attacks();
         Shooting();
+
+        //Reset timing
+        if (Time.time > comboStart + comboNext)
+        {
+            comboStart = Time.time;
+            comboCount = 0;
+            //Debug.Log("MeleeCombo(): Reset");
+            
+        }
+
     }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Enemy")) {
+            rb.AddExplosionForce(1000f, transform.position, 10f, 10f, ForceMode.Impulse);
+        }
+    }
+
 
     public void UpdateParserScript() {
         manager = GameObject.Find("Manager");
@@ -145,6 +176,7 @@ public class Player : MonoBehaviour {
         if (Input.GetKey(KeyCode.W))
         {
             moving = true;
+            comboCount = 0;
             direction = direction + Vector3.forward * sensitivity * Time.deltaTime;
             faceDirection = direction;
             transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime*100);
@@ -152,6 +184,7 @@ public class Player : MonoBehaviour {
         if (Input.GetKey(KeyCode.S))
         {
             moving = true;
+            comboCount = 0;
             direction = direction + Vector3.back * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
@@ -160,6 +193,7 @@ public class Player : MonoBehaviour {
         if (Input.GetKey(KeyCode.A))
         {
             moving = true;
+            comboCount = 0;
             direction = direction + Vector3.left * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
@@ -168,11 +202,12 @@ public class Player : MonoBehaviour {
         if (Input.GetKey(KeyCode.D))
         {
             moving = true;
+            comboCount = 0;
             direction = direction + Vector3.right * sensitivity * Time.deltaTime;
             faceDirection = direction;
             //transform.LookAt(faceDirection);
             transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
-        }        
+        }
         rb.MovePosition(transform.position + direction);
     }
 
@@ -190,14 +225,29 @@ public class Player : MonoBehaviour {
 
     void Punch(int type) {
         switch (type) {
+            case 0:
+                //arm.transform.localScale = new Vector3(3f, 1f, 1f);                
+                anim.Play("SwordSwing");
+                //anim.Play("SwordThrust");
+                //arm.transform.Rotate(new Vector3(1f, 10f, 1f));
+                //rb.MovePosition(transform.position + direction*10f);
+                break;
             case 1:
-                arm.transform.localScale = new Vector3(2f, 1f, 1f);
+                //arm.transform.localScale = new Vector3(1f, 1f, 2f);
+                //direction = direction + Vector3.forward * sensitivity * 10f * Time.deltaTime;
+                anim.Play("SwordThrust");
+                //Debug.Log("ThrustSword");
+                //rb.MovePosition(transform.position + faceDirection * 10f);
+
+                //transform.SetPositionAndRotation(transform.position + direction * 10f, transform.rotation);
+                //arm.transform.Rotate(new Vector3(10f, 1f, 1f));
                 break;
             case 2:
-                arm.transform.localScale = new Vector3(1f, 1f, 2f);
-                break;
-            case 3:
-                arm.transform.localScale = new Vector3(3f, 3f, 3f);
+                //arm.transform.localScale = new Vector3(3f, 1f, 1f);
+                //arm.transform.Rotate(new Vector3(1f, 1f, 180f));
+                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
+                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
+                anim.Play("SwordPound");
                 break;
             default:
                 break;
@@ -235,7 +285,7 @@ public class Player : MonoBehaviour {
         //ShootDivide();
         //ShootExponent();
         ShootRed();
-        ShootGreen();
+        //ShootGreen();
         ShootBlue();
         ShootWhite();
         ShootBomb();
@@ -244,15 +294,17 @@ public class Player : MonoBehaviour {
         SelectMultiply();
         SelectDivide();
         SelectExponent();
+        StartCombo();
     }
 
     void ShootRed() 
     {
-        if (Input.GetKey(KeyCode.Semicolon) && Time.time > nextFire)
+        if (Input.GetKey(KeyCode.Semicolon) && Time.time > comboStart)
         {
-            nextFire = Time.time + fireRate;
+            comboStart = Time.time + comboNext;
             hbutton.Select();
-            Shoot(bulletPoolRed);
+            //Shoot(bulletPoolRed);
+            Punch(1);
             parserScript.UpdateLeaves(true, false, false, false);
         }
         else if (Input.GetKeyUp(KeyCode.Semicolon))
@@ -260,64 +312,67 @@ public class Player : MonoBehaviour {
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }
-    void ShootGreen()
+    //void ShootGreen()
+    void StartCombo()
     {
         //need a combo structure here
-        if (Input.GetKeyDown(KeyCode.J) && Time.time > nextFire)
+        if (Input.GetKeyDown(KeyCode.J) && Time.time > comboStart)
         {
-            //meleeing = true;
-            nextFire = Time.time + fireRate;
+            meleeing = true;
+            comboStart = Time.time + comboNext;
             jbutton.Select();
             //Shoot(bulletPoolGreen);
             //Punch();
-            MeleeCombo();
+            //MeleeCombo();
+            Punch(0);
             parserScript.UpdateLeaves(false, true, false, false);
         }
         else if (Input.GetKeyUp(KeyCode.J))
         {
-            //meleeing = false;
+            meleeing = false;
             RetractPunch();
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }
 
     void MeleeCombo() {
-
         if (comboCount == 0)
-        {
-            comboCount++;
+        {            
             Debug.Log("MeleeCombo(): " + comboCount);
-            ComboStart();
-            Punch(1);
+            comboStart = Time.time;
+            Punch(comboCount);
+            comboCount++;
         }
-        else if (comboCount == maxCombo) {
+        else if (comboCount == maxCombo-1) {
             Punch(comboCount);
             Debug.Log("MeleeCombo(): Max Combo");
             comboCount = 0;
         }
         else if (comboCount >= 1)
         {
-            if (Time.time <= comboStart + comboNext)
-            {
-                Debug.Log("MeleeCombo(): " + comboCount);
-                comboCount++;
-                comboStart = Time.time;
-                Punch(comboCount);
-            }
-            else
-            {
-                Debug.Log("MeleeCombo(): Reset");
-                comboCount = 0;
-                Punch(1);
-            }
+            //if (Time.time <= comboStart + comboNext)
+            //{
+            
+            //    comboCount++;
+            //    comboStart = Time.time;
+            //    Punch(comboCount);
+            //}
+            //else
+            //{
+
+            //comboCount = 0;
+            Punch(comboCount);
+            Debug.Log("MeleeCombo(): " + comboCount);
+            comboCount++;
+            //}
         }
 
     }
 
-    void ComboStart() {
-        comboStart = Time.time;
+    //void ComboStart() {
+    //    comboStart = Time.time;
         
-    }
+    //}
 
     void ShootBlue()
     {
@@ -335,11 +390,12 @@ public class Player : MonoBehaviour {
     }
     void ShootWhite()
     {
-        if (Input.GetKey(KeyCode.L) && Time.time > nextFire)
+        if (Input.GetKey(KeyCode.L) && Time.time > comboStart)
         {
-            nextFire = Time.time + fireRate;
+            comboStart = Time.time + comboNext;
             lbutton.Select();
-            Shoot(bulletPoolWhite);
+            //Shoot(bulletPoolWhite);
+            Punch(2);
             parserScript.UpdateLeaves(false, false, false, true);
         }
         else if (Input.GetKeyUp(KeyCode.L))
@@ -371,6 +427,8 @@ public class Player : MonoBehaviour {
                 //Debug.Log("Shoot()");
                 BulletScript bs = pool[i].GetComponent<BulletScript>();
                 bs.SetDirection(faceDirection); ;
+                bs.SetInitialPosition(transform.position);
+                bs.SetRotation(transform.rotation);
                 i = 0;
             }
         }
@@ -495,5 +553,29 @@ public class Player : MonoBehaviour {
         }
     }
 
+    public void AddToRunePool(String op) {
+        runePool.Add(op);
+    }
 
+    public Boolean CheckIfInRunePool(String op) {
+        return runePool.Contains(op);
+    }
+
+    public void AddToRuneCache(List<String> cache, String op) {
+        cache.Add(op);
+    }
+
+    public Boolean CheckIfAllRunesInCacheIsInRunePool(List<String> cache) {
+        Boolean runesAreAllPresent = true;
+        for (int i = 0; i < cache.Count; i++) {
+            if (!runePool.Contains(cache[i])){
+                runesAreAllPresent = false;
+                break;
+            }
+            runesAreAllPresent = true;
+        }
+        return runesAreAllPresent;
+    }
+
+    //have to revamp how the parser gets solved (since we want to also consume operations?
 }

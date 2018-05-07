@@ -45,11 +45,11 @@ public class NodeScript : MonoBehaviour {
         myText = GetComponent<Text>();
 
         if (!gameObject.name.Equals("Tree1")) {
-            Debug.Log(transform.GetChild(0).transform.childCount);
-            Debug.Log(transform.GetChild(0).GetChild(0).name);
-            Debug.Log(transform.GetChild(0).GetChild(1).name);
-            Debug.Log(transform.GetChild(0).GetChild(2).name);
-            Debug.Log(transform.GetChild(0).GetChild(3).name);
+            //Debug.Log(transform.GetChild(0).transform.childCount);
+            //Debug.Log(transform.GetChild(0).GetChild(0).name);
+            //Debug.Log(transform.GetChild(0).GetChild(1).name);
+            //Debug.Log(transform.GetChild(0).GetChild(2).name);
+            //Debug.Log(transform.GetChild(0).GetChild(3).name);
 
             redSprite = transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>();
             greenSprite = transform.GetChild(0).GetChild(1).GetComponent<SpriteRenderer>();
@@ -302,6 +302,7 @@ public class NodeScript : MonoBehaviour {
                 this.DisableLeaves();
                 //this.leftGameObjectChild.SetActive(false);
                 //this.rightGameObjectChild.SetActive(false);
+                //call up the operation storer in Player.cs
             }
         }
         EventSystem.current.SetSelectedGameObject(null);

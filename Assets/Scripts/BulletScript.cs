@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,15 +32,26 @@ public class BulletScript : MonoBehaviour {
         
     }
 
+    //below doesn't always get called
     private void OnEnable()
     {
-        transform.position = nozzle.transform.position;
-        transform.rotation = nozzle.transform.rotation;
+        //transform.position = nozzle.transform.position;
+        //transform.rotation = nozzle.transform.rotation;
     }
 
     private void OnDisable()
     {
         //reset position and velocity
         rb.velocity = Vector3.zero;
+    }
+
+    internal void SetInitialPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
+
+    internal void SetRotation(Quaternion rotation)
+    {
+        transform.rotation = rotation;
     }
 }
