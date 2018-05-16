@@ -15,6 +15,7 @@ public class EnemyScript : MonoBehaviour {
     public int health;
     public Renderer rend;
     Color healthColor;
+    SoundManager soundManager;
 
     // Use this for initialization
     void Awake () {
@@ -32,7 +33,7 @@ public class EnemyScript : MonoBehaviour {
         rend.material.shader = Shader.Find("_Color");
         healthColor = new Color(.25f * health, .25f * health, .25f * health);
         rend.material.SetColor("_Color", healthColor);
-
+        soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
 
     }
 	
@@ -66,6 +67,7 @@ public class EnemyScript : MonoBehaviour {
             AskForLoot();
             Hit();
             other.gameObject.SetActive(false);
+            soundManager.PlaySound(5);
         }
         else if (other.gameObject.tag.Equals("Sword")) {
             GetHit(other.transform.position, 2.5f);
@@ -74,6 +76,7 @@ public class EnemyScript : MonoBehaviour {
             time = Time.time;
             //gameObject.SetActive(false);
             Hit();
+            soundManager.PlaySound(1);
         }
     }
 

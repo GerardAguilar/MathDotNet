@@ -34,6 +34,8 @@ public class NodeScript : MonoBehaviour {
     public LineRenderer lineRenderer;
     Text myText;
 
+    Player playerScript;
+
     //public void Awake()
     //{
     //    lineRenderer = GetComponentInChildren<LineRenderer>();
@@ -43,6 +45,7 @@ public class NodeScript : MonoBehaviour {
     {
         //GetComponentInChildren<Text>().text = node.getValue() + "";
         myText = GetComponent<Text>();
+        playerScript = GameObject.Find("Player").GetComponent<Player>();
 
         if (!gameObject.name.Equals("Tree1")) {
             //Debug.Log(transform.GetChild(0).transform.childCount);
@@ -70,6 +73,7 @@ public class NodeScript : MonoBehaviour {
             RandomizeColors();
             ColorSprites();
 
+            
 
         }
     }
@@ -298,11 +302,13 @@ public class NodeScript : MonoBehaviour {
                 ASTNode rightChild = node.getRightASTNode();
                 string temp = this.RunOperation();
                 Debug.Log("nodeScript.Solve() = " + temp);
+                playerScript.AddToRunePool(playerScript.runePool, this.node.getValue());
                 this.node.setValue(temp);
                 this.DisableLeaves();
                 //this.leftGameObjectChild.SetActive(false);
                 //this.rightGameObjectChild.SetActive(false);
                 //call up the operation storer in Player.cs
+                
             }
         }
         EventSystem.current.SetSelectedGameObject(null);

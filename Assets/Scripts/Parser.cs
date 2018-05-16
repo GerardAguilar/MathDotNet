@@ -58,6 +58,24 @@ public class Parser : MonoBehaviour
         parser.DrawASTTemplate2(nodeObjects, gameObjectTreeHeight);        
     }
 
+    public NodeScript FindFirstNodeWithOnlyLeaves()
+    {
+        NodeScript ns = null;
+        for (int i = 0; i < nodeObjects.Count; i++)
+        {
+            ns = nodeObjects[i].GetComponent<NodeScript>();
+            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves())
+            {
+                //should return ns above
+                //doesn't need to get the actual operation
+                break;
+            }
+            //nullifies ns on each pass
+            ns = null;
+        }
+        return ns;
+    }
+
     public NodeScript FindFirstNodeWithOnlyLeaves(string op)
     {
         NodeScript ns = null;
@@ -112,7 +130,7 @@ public class Parser : MonoBehaviour
             for (int i = nodeObjects.Count - 1; i >= 0; i--)
             {
                 //Destroy(nodeObjects[i]);
-                Debug.Log("Disabling: nodeObjects[" + i + "]");
+                //Debug.Log("Disabling: nodeObjects[" + i + "]");
                 nodeObjects[i].SetActive(false);
             }
         }

@@ -18,7 +18,7 @@ public class ArmScript : MonoBehaviour {
     public void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy")) {
-            Debug.Log("OnTriggerEnter");
+            //Debug.Log("OnTriggerEnter");
             Rigidbody targetRigidbody = other.gameObject.GetComponent<Rigidbody>();
             targetRigidbody.AddExplosionForce(300f, transform.position, 10f);
         }

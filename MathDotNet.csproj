@@ -316,8 +316,10 @@
     <Compile Include="Assets\Scripts\PowerUpScript.cs" />
     <Compile Include="Assets\Scripts\Scrap.cs" />
     <Compile Include="Assets\Scripts\test.cs" />
+    <Compile Include="Assets\SoundManager.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\FreePixelGear\ReadMe.txt" />
     <None Include="Assets\NuGet\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
