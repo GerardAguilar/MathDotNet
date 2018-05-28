@@ -569,15 +569,18 @@ public class ShuntingYardParser
 
         //J > 0 too since we really start with length of 1 at the root
         //change the rest of the branches
-        for (int j = pathLength; j > 0; j--) {
-            for (int i = 0; i < nodeObjects.Count; i++) {
+        for (int j = pathLength; j > 0; j--)
+        {
+            for (int i = 0; i < nodeObjects.Count; i++)
+            {
                 NodeScript nodeScript = nodeObjects[i].GetComponent<NodeScript>();
-                if (nodeScript.path.Length == j) {
+                if (nodeScript.path.Length == j)
+                {
                     GameObject myObject = nodeScript.gameObject;
                     int temp = Convert.ToInt32(nodeScript.path, 2);
 
                     Vector3 pos = myObject.GetComponent<RectTransform>().anchoredPosition;
-                    float leftShiftedX = (temp*nodeInBetweenWidth) - ((Mathf.Pow(2,j)/4)* nodeInBetweenWidth);
+                    float leftShiftedX = (temp * nodeInBetweenWidth) - ((Mathf.Pow(2, j) / 4) * nodeInBetweenWidth);
                     myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, -j * nodeInBetweenHeight, pos.z);
                     //myObject.GetComponent<RectTransform>().anchoredPosition = new Vector3(leftShiftedX, pos.y, -j * 300);
                 }

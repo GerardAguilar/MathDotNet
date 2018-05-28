@@ -8,6 +8,9 @@ public class EnemyScript : MonoBehaviour {
     GameObject player;
     EnemyManagerScript enemyManagerScript;
     GameObject powerUp;
+    List<GameObject> attributeShardList;
+    GameObject attributeShard;
+    GameObject environment;
     Rigidbody rb;
     Player playerScript;
     float hitstun;
@@ -21,6 +24,14 @@ public class EnemyScript : MonoBehaviour {
     void Awake () {
         powerUp = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/PowerUp"));
         powerUp.SetActive(false);
+        environment = GameObject.Find("Environment");
+        attributeShardList = new List<GameObject>();
+        for (int i = 0; i < 10; i++) {
+            attributeShard = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/AttributeShard"));
+            attributeShard.transform.SetParent(this.transform);
+            attributeShardList.Add(attributeShard);
+            attributeShard.SetActive(false);
+        }
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.Find("Player");
         playerScript = player.GetComponent<Player>();
@@ -64,13 +75,14 @@ public class EnemyScript : MonoBehaviour {
     {
         if (other.gameObject.tag.Equals("Projectile"))
         {
-            AskForLoot();
+            AskForAttributeShards(other.ClosestPoint(player.transform.position));
             Hit();
             other.gameObject.SetActive(false);
             soundManager.PlaySound(5);
         }
         else if (other.gameObject.tag.Equals("Sword")) {
             GetHit(other.transform.position, 2.5f);
+            AskForAttributeShards(other.ClosestPoint(player.transform.position));
             //GetHit(playerScript.faceDirection, 1f);
             //GetHit(playerScript.gameObject.transform.position, playerScript.faceDirection, 2.5f);
             time = Time.time;
@@ -88,6 +100,30 @@ public class EnemyScript : MonoBehaviour {
             powerUp.transform.position = gameObject.transform.position;
             enemyManagerScript.RemoveEnemyFromList(this.gameObject);
         }
+    }
+
+    private void AskForAttributeShards(Vector3 impactSource ) {
+        int random = Random.Range(0, 10);
+        for (int i = 0; i < random; i++) {
+            GetInactiveAttributeShardFromList(impactSource);
+        }
+    }
+
+    private GameObject GetInactiveAttributeShardFromList(Vector3 impactSource) {
+        GameObject attributeShard = null; ;
+        for (int i = 0; i < attributeShardList.Count; i++) {
+            if (!attributeShardList[i].activeInHierarchy) {
+                attributeShardList[i].transform.position = transform.position;
+                attributeShardList[i].SetActive(true);
+                attributeShard = attributeShardList[i];                
+            }
+        }
+        if (attributeShard != null) {
+            attributeShard.transform.position = this.transform.position;
+            attributeShard.transform.SetParent(environment.transform);
+            //attributeShard.GetComponent<Rigidbody>().AddForce(impactSource, ForceMode.Impulse);
+        }
+        return attributeShard;
     }
 
     private void GetHit(Vector3 source, float force) {
