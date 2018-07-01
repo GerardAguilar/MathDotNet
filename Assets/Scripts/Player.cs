@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
+    #region Attributes
     Rigidbody rb;
     public int sensitivity;
     public int rotationSpeed;
@@ -62,9 +63,19 @@ public class Player : MonoBehaviour {
     List<String> runePCache;
 
     SoundManager soundManager;
-    NodeScript ns;
+    //NodeScript ns;
 
-    // Use this for initialization
+    Boolean stage1 = false;
+    Boolean stage2 = false;
+    Boolean stage3 = false;
+    float comboTime;
+    float stage1InputDelay = .5f;
+    float stage2InputDelay = .5f;
+    float stage3InputDelay = .5f;
+
+    #endregion
+
+    #region Awake()
     void Awake () {
         parserScript = manager.GetComponent<Parser>();
         rb = GetComponent<Rigidbody>();
@@ -124,25 +135,29 @@ public class Player : MonoBehaviour {
 
         anim = gameObject.GetComponent<Animator>();
 
-        runePool = new List<string>();
-        runeYCache = new List<string>();
-        runeUCache = new List<string>();
-        runeICache = new List<string>();
-        runeOCache = new List<string>();
-        runePCache = new List<string>();
+        //runePools are an old implementation of skill activation
+        //the purpose is to keep track of triggered ops to activate something
+        //we use runePool to gather realtime triggered ops, and the runeCache are the specific ops that need to be activated in order to change the skill
+        //runePool = new List<string>();
+        //runeYCache = new List<string>();
+        //runeUCache = new List<string>();
+        //runeICache = new List<string>();
+        //runeOCache = new List<string>();
+        //runePCache = new List<string>();
 
-        //this is for charging
-        //AddToRunePool(runePool, "^");
-        //AddToRunePool(runePool, "+");
+        ////this is for charging
+        ////AddToRunePool(runePool, "^");
+        ////AddToRunePool(runePool, "+");
 
-        //these are the skill activation requirements
-        AddToRunePool(runeYCache, "^");
-        AddToRunePool(runeYCache, "-");
+        ////these are the skill activation requirements
+        //AddToRunePool(runeYCache, "^");       
+        //AddToRunePool(runeYCache, "-");
 
-        Debug.Log(IsAllOfCacheInPool(runePool, runeYCache));
+        //Debug.Log(IsAllOfCacheInPool(runePool, runeYCache));
 
         soundManager = GameObject.Find("SoundManager").GetComponent<SoundManager>();
     }
+    #endregion
 
     private bool IsAllOfCacheInPool(List<string> pool, List<string> cache)
     {
@@ -155,32 +170,23 @@ public class Player : MonoBehaviour {
         return cacheInPool;
     }
 
-    // Update is called once per frame
+    #region Update()
     void Update () {
-        //MoveWithAddForce();
-        //MoveWithTranslate();
-        if (!meleeing) {
-            MoveWithMovePosition();
-        }
-        Attacks();
+
+        MoveWithMovePosition();
         Shooting();
-
-        //Reset timing
-        if (Time.time > comboStart + comboNext)
-        {
-            comboStart = Time.time;
-            comboCount = 0;
-            //Debug.Log("MeleeCombo(): Reset");
-            
-        }
-
+        Specials();
+        StartCombo();
+        ResetComboTime();
     }
+    #endregion
 
+    #region OnTriggerEnter()
     public void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-            rb.AddExplosionForce(1000f, transform.position, 10f, 10f, ForceMode.Impulse);
+            //rb.AddExplosionForce(1000f, transform.position, 10f, 10f, ForceMode.Impulse);
         }
         else if (other.gameObject.CompareTag("AttributeShard")) {
             AttributeShardScript attributeShardScript = other.gameObject.GetComponent<AttributeShardScript>();
@@ -188,7 +194,12 @@ public class Player : MonoBehaviour {
             other.gameObject.SetActive(false);
         }
     }
+    #endregion
 
+    void Specials() {
+        SelectSpecial1();
+        SelectSpecial2();
+    }
 
     public void UpdateParserScript() {
         manager = GameObject.Find("Manager");
@@ -207,98 +218,81 @@ public class Player : MonoBehaviour {
 
     void MoveWithMovePosition()
     {
-        direction = Vector3.zero;
-        
-        if (Input.GetKey(KeyCode.W))
-        {
-            moving = true;
-            comboCount = 0;
-            direction = direction + Vector3.forward * sensitivity * Time.deltaTime;
-            faceDirection = direction;
-            transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime*100);
+        if (!meleeing) {
+            direction = Vector3.zero;
+
+            #region MovementInputs
+            if (Input.GetKey(KeyCode.W))
+            {
+                moving = true;
+                comboCount = 0;
+                direction = direction + Vector3.forward * sensitivity * Time.deltaTime;
+                faceDirection = direction;
+                transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                moving = true;
+                comboCount = 0;
+                direction = direction + Vector3.left * sensitivity * Time.deltaTime;
+                faceDirection = direction;
+                //transform.LookAt(faceDirection);
+                transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                moving = true;
+                comboCount = 0;
+                direction = direction + Vector3.back * sensitivity * Time.deltaTime;
+                faceDirection = direction;
+                //transform.LookAt(faceDirection);
+                transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                moving = true;
+                comboCount = 0;
+                direction = direction + Vector3.right * sensitivity * Time.deltaTime;
+                faceDirection = direction;
+                //transform.LookAt(faceDirection);
+                transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
+            }
+            #endregion
+
+            rb.MovePosition(transform.position + direction);
         }
-        if (Input.GetKey(KeyCode.S))
-        {
-            moving = true;
-            comboCount = 0;
-            direction = direction + Vector3.back * sensitivity * Time.deltaTime;
-            faceDirection = direction;
-            //transform.LookAt(faceDirection);
-            transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            moving = true;
-            comboCount = 0;
-            direction = direction + Vector3.left * sensitivity * Time.deltaTime;
-            faceDirection = direction;
-            //transform.LookAt(faceDirection);
-            transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            moving = true;
-            comboCount = 0;
-            direction = direction + Vector3.right * sensitivity * Time.deltaTime;
-            faceDirection = direction;
-            //transform.LookAt(faceDirection);
-            transform.LookAt(transform.position + rb.velocity * sensitivity * Time.deltaTime * 100);
-        }
-        rb.MovePosition(transform.position + direction);
     }
-
-    void Attacks() {
-        //if (Input.GetKeyDown(KeyCode.X)) {
-        //    Punch();            
-        //}
-        //if (Input.GetKeyUp(KeyCode.X)) {
-        //    RetractPunch();
-        //}
-        //MeleeCombo();
-
-
+    
+    void ResetComboTime()
+    {
+        if (Time.time > comboStart + comboNext)
+        {
+            comboStart = Time.time;
+            comboCount = 0;
+        }
     }
 
     void Punch(int type) {
         switch (type) {
             case 0:
-                //arm.transform.localScale = new Vector3(3f, 1f, 1f);   
                 meleeing = true;
                 anim.Play("SwordSwing");
                 soundManager.PlaySound(0);
                 Debug.Log("Punch(0)");
-                //anim.Play("SwordThrust");
-                //arm.transform.Rotate(new Vector3(1f, 10f, 1f));
-                //rb.MovePosition(transform.position + direction*10f);
                 break;
             case 1:
-                //arm.transform.localScale = new Vector3(1f, 1f, 2f);
-                //direction = direction + Vector3.forward * sensitivity * 10f * Time.deltaTime;
                 meleeing = true;
                 anim.Play("SwordThrust");
                 soundManager.PlaySound(4);
                 Debug.Log("Punch(1)");
-                //Debug.Log("ThrustSword");
-                //rb.MovePosition(transform.position + faceDirection * 10f);
-
-                //transform.SetPositionAndRotation(transform.position + direction * 10f, transform.rotation);
-                //arm.transform.Rotate(new Vector3(10f, 1f, 1f));
                 break;
             case 2:
-                //arm.transform.localScale = new Vector3(3f, 1f, 1f);
-                //arm.transform.Rotate(new Vector3(1f, 1f, 180f));
-                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
-                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
                 meleeing = true;
                 anim.Play("SwordPound");
                 soundManager.PlaySound(3);
                 Debug.Log("Punch(2)");
                 break;
             case 3:
-                //arm.transform.localScale = new Vector3(3f, 1f, 1f);
-                //arm.transform.Rotate(new Vector3(1f, 1f, 180f));
-                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
-                //arm.transform.localScale = new Vector3(2f, 2f, 8f);
                 anim.Play("SwordSpecial");
                 soundManager.PlaySound(3);
                 Debug.Log("Punch(3)");
@@ -306,67 +300,64 @@ public class Player : MonoBehaviour {
             default:
                 break;
         }
-        
+    }
+
+    //should be 6 basic types with two arguments
+    //how do we deal with compound attributes up the line?
+    //make it so that it makes sense
+    //
+
+    //when you press y,u,i,o.p,[
+    //these correspond to different operators
+    //the event would then consume what's on the ember machina (provided that it's been charged)
+    //and trigger power ups
+    void OperatorEffect(int type) {
+        switch (type)
+        {
+            case 0:
+                
+                break;
+            case 1:
+
+            case 2:
+
+            case 3:
+
+            default:
+                break;
+        }
     }
 
     void RetractPunch() {
         arm.transform.localScale = new Vector3(.35f, 1f, 1f);
     }
 
-    //void Punch2() {
-    //    Debug.Log("Punch2()");
-    //    Quaternion neededRotation = Quaternion.Euler(rot);
-    //    arm.transform.localScale = new Vector3(1f, 1f, 1f);
-    //    //arm.transform.rotation = Quaternion.RotateTowards(arm.transform.rotation, neededRotation, Time.deltaTime);
-    //    //arm.transform.Rotate(rot);
-    //    arm.transform.rotation = Quaternion.Euler(Vector3.Lerp(arm.transform.rotation.eulerAngles, rot, Time.deltaTime * rotationSpeed));
-    //    Debug.Log(arm.transform.rotation);
-    //}
-
-    //void RetractPunch2() {
-    //    arm.transform.localScale = new Vector3(.35f, 1f, 1f);
-    //}
-
-    //void Kick() {
-    //    arm.transform.localScale = new Vector3(1f, 1f, 1f);
-
-    //}
-
     void Shooting() {
-        //ShootAdd();
-        //ShootSubtract();
-        //ShootMultiply();
-        //ShootDivide();
-        //ShootExponent();
         ShootRed();
         //ShootGreen();
-        ShootBlue();
-        ShootWhite();
-        ShootBomb();
-        SelectAdd();
+        //ShootBlue();
+        //ShootWhite();
+        //ShootBomb();
+        
         SelectSubtract();
         SelectMultiply();
         SelectDivide();
         SelectExponent();
-        //StartCombo();
-        StartCombo2();
+        SelectAdd();
     }
+
+
 
     void ShootRed() 
     {
+        //if keydown
+        //shoot
+
         if (Input.GetKeyDown(KeyCode.H) && Time.time > comboStart)
         {
-            //ns = parserScript.FindFirstNodeWithOnlyLeaves();
-            //if (ns != null)
-            //{
-            //    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-            //    {
-            //        ns.Solve();
-            //    }
-            //}
             comboStart = Time.time + comboNext;
             hbutton.Select();
-            //Shoot(bulletPoolRed);
+            Shoot(bulletPoolRed);
             //Punch(1);
             //parserScript.UpdateLeaves(true, false, false, false);
         }
@@ -375,46 +366,8 @@ public class Player : MonoBehaviour {
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }
-    //void ShootGreen()
-    //void StartCombo()
-    //{
-    //    //need a combo structure here
-    //    if (Input.GetKeyDown(KeyCode.J) && Time.time > comboStart)
-    //    {
-    //        //ns = parserScript.FindFirstNodeWithOnlyLeaves();
-    //        //if (ns != null)
-    //        //{
-    //        //    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-    //        //    {
-    //        //        ns.Solve();
-    //        //    }
-    //        //}
-    //        meleeing = true;
-    //        comboStart = Time.time + comboNext;
-    //        jbutton.Select();
-    //        //Shoot(bulletPoolGreen);
-    //        //Punch();
-    //        //MeleeCombo();
-    //        Punch(0);
-    //        //parserScript.UpdateLeaves(false, true, false, false);
-    //    }
-    //    else if (Input.GetKeyUp(KeyCode.J))
-    //    {
-    //        meleeing = false;
-    //        RetractPunch();
-    //        EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
-    //    }
-    //}
 
-    Boolean stage1 = false;
-    Boolean stage2 = false;
-    Boolean stage3 = false;
-    float comboTime;
-    float stage1InputDelay = .5f;
-    float stage2InputDelay = .5f;
-    float stage3InputDelay = .5f;
-
-    void StartCombo2() {
+    void StartCombo() {
         if (Input.GetKeyDown(KeyCode.J))
         {
             jbutton.Select();
@@ -423,13 +376,11 @@ public class Player : MonoBehaviour {
                 Punch(2);
                 stage3 = false;
             }
-
             if (stage2)
             {
                 Punch(1);
                 SetStage3();
             }
-
             if (stage1)
             {
                 comboTime = Time.time;
@@ -462,80 +413,6 @@ public class Player : MonoBehaviour {
         stage3 = true;
     }
 
-    void ShootBlue()
-    {
-        if (Input.GetKey(KeyCode.K) && Time.time > nextFire)
-        {
-            //ns = parserScript.FindFirstNodeWithOnlyLeaves();
-            //if (ns != null) {
-            //    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-            //    {
-            //        ns.Solve();
-            //    }
-            //}
-            
-            nextFire = Time.time + fireRate;
-            kbutton.Select();
-            Shoot(bulletPoolBlue);
-            //parserScript.UpdateLeaves(false, false, true, false);
-            soundManager.PlaySound(2);
-        }
-        else if (Input.GetKeyUp(KeyCode.K))
-        {
-            EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
-        }
-    }
-    void ShootWhite()
-    {
-        if (Input.GetKeyDown(KeyCode.L) && Time.time > comboStart)
-        {
-            //ns = parserScript.FindFirstNodeWithOnlyLeaves();
-            //if (ns != null)
-            //{
-            //    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-            //    {
-            //        ns.Solve();
-            //    }
-            //}
-            comboStart = Time.time + comboNext;
-            lbutton.Select();
-            //Shoot(bulletPoolWhite);
-            Punch(2);
-            //parserScript.UpdateLeaves(false, false, false, true);
-            meleeing = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.L))
-        {
-            EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
-            meleeing = false;
-        }
-    }
-    void ShootBomb()
-    {
-        if (Input.GetKeyDown(KeyCode.Semicolon) && Time.time > comboStart)
-        {
-            //ns = parserScript.FindFirstNodeWithOnlyLeaves();
-            //if (ns != null)
-            //{
-            //    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-            //    {
-            //        ns.Solve();
-            //    }
-            //}
-            comboStart = Time.time + comboNext;
-            semicolonbutton.Select();
-            //Shoot(bulletPoolWhite);
-            //parserScript.UpdateLeaves(false, false, false, true);
-            Punch(1);
-            meleeing = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.Semicolon))
-        {
-            EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
-            meleeing = false;
-        }
-    }
-
     void Shoot(List<GameObject> pool) {
         for (int i = pool.Count - 1; i >= 0; i--)
         {
@@ -551,15 +428,12 @@ public class Player : MonoBehaviour {
             }
         }
     }
-
-    void SelectExponent()
+    void SelectSpecial1()
     {
-        //if (Input.GetKeyDown(KeyCode.Y) && IsAllOfCacheInPool(runePool, runeYCache))
-        if (Input.GetKeyDown(KeyCode.Y))
+        //if (Input.GetKey(KeyCode.P) && IsAllOfCacheInPool(runePool, runePCache))
+        if (Input.GetKey(KeyCode.K))
         {
-            Debug.Log("SelectExponent()");
-            ybutton.Select();
-            Punch(3);
+            kbutton.Select();
             try
             {
                 //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
@@ -567,31 +441,82 @@ public class Player : MonoBehaviour {
                 //{
                 //    ns.Solve();
                 //}
+                Shoot(bulletPoolMultiply);
             }
-            catch (Exception e) {
-                Debug.Log("No ^ with just leaves found. Error: " + e);
+            catch (Exception e)
+            {
+                Debug.Log("No + with just leaves found. Error: " + e);
             }
-
         }
-        else if (Input.GetKeyUp(KeyCode.Y)) {
+        else if (Input.GetKeyUp(KeyCode.K))
+        {
+            EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
+        }
+    }
+    
+    void SelectSpecial2()
+    {
+        //if (Input.GetKey(KeyCode.U) && IsAllOfCacheInPool(runePool, runeUCache))
+        if (Input.GetKey(KeyCode.L))
+        {
+            lbutton.Select();
+            try
+            {
+                //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
+                //if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                //{
+                //    ns.Solve();
+                //}
+                Shoot(bulletPoolGreen);
+            }
+            catch (Exception e)
+            {
+                Debug.Log("No - with just leaves found. Error: " + e);
+            }
+        }
+        else if (Input.GetKeyUp(KeyCode.L))
+        {
             EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
         }
     }
 
-    void SelectSubtract()
-    {
-        //if (Input.GetKey(KeyCode.U) && IsAllOfCacheInPool(runePool, runeUCache))
+    void SelectAdd() {
+        if (Input.GetKey(KeyCode.Y))
+        {
+            ybutton.Select();
+            try
+            {
+                NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("+");
+                if (ns != null) {
+                    if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                    {
+                        Debug.Log("ns.Solve()");
+                        ns.Solve();
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.Log("No + with just leaves found. Error: " + e);
+            }
+        }
+        else if (Input.GetKeyUp(KeyCode.Y))
+        {
+            EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(null);
+        }
+    }
+    void SelectSubtract() {
         if (Input.GetKey(KeyCode.U))
         {
             ubutton.Select();
             try
             {
-                //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
-                //if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-                //{
-                //    ns.Solve();
-                //}
-                Shoot(bulletPoolRed);
+                NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("-");
+                if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                {
+                    ns.Solve();
+                }
             }
             catch (Exception e)
             {
@@ -612,12 +537,12 @@ public class Player : MonoBehaviour {
             ibutton.Select();
             try
             {
-                //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
-                //if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-                //{
-                //    ns.Solve();
-                //}
-                Shoot(bulletPoolGreen);
+                NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("*");
+                if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                {
+                    ns.Solve();
+                }
+                //Shoot(bulletPoolGreen);
             }
             catch (Exception e)
             {
@@ -638,12 +563,12 @@ public class Player : MonoBehaviour {
             obutton.Select();
             try
             {
-                //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
-                //if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-                //{
-                //    ns.Solve();
-                //}
-                Shoot(bulletPoolWhite);
+                NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("/");
+                if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                {
+                    ns.Solve();
+                }
+                //Shoot(bulletPoolWhite);
             }
             catch (Exception e)
             {
@@ -656,25 +581,27 @@ public class Player : MonoBehaviour {
         }
     }
 
-    void SelectAdd()
+    
+
+    void SelectExponent()
     {
-        //if (Input.GetKey(KeyCode.P) && IsAllOfCacheInPool(runePool, runePCache))
-        if (Input.GetKey(KeyCode.P))
+        //if (Input.GetKeyDown(KeyCode.Y) && IsAllOfCacheInPool(runePool, runeYCache))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             pbutton.Select();
             try
             {
-                //NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
-                //if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
-                //{
-                //    ns.Solve();
-                //}
-                Shoot(bulletPoolMultiply);
+                NodeScript ns = parserScript.FindFirstNodeWithOnlyLeaves("^");
+                if (ns.AreAllColorValuesZeroOrLessOfMyChildren())
+                {
+                    ns.Solve();
+                }
             }
             catch (Exception e)
             {
-                Debug.Log("No + with just leaves found. Error: " + e);
+                Debug.Log("No ^ with just leaves found. Error: " + e);
             }
+
         }
         else if (Input.GetKeyUp(KeyCode.P))
         {

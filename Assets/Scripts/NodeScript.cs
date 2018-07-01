@@ -117,6 +117,7 @@ public class NodeScript : MonoBehaviour {
     }
 
     public bool AreAllColorValuesZeroOrLessOfMyChildren() {
+        Debug.Log("AreAllColorValuesZeroOrLessOfMyChildren");
         bool allZeroOrLess = false;
         NodeScript left = leftGameObjectChild.GetComponent<NodeScript>();
         NodeScript right = rightGameObjectChild.GetComponent<NodeScript>();
@@ -124,6 +125,7 @@ public class NodeScript : MonoBehaviour {
         if (left.AreAllColorValuesZeroOrLess() && right.AreAllColorValuesZeroOrLess()) {
             allZeroOrLess = true;
         }
+        Debug.Log("AreAllColorValuesZeroOrLessOfMyChildren: " + allZeroOrLess);
         return allZeroOrLess;
     }
 
@@ -221,7 +223,7 @@ public class NodeScript : MonoBehaviour {
 
     public bool CheckIfOperation() 
     {        
-        string character = node.getValue();
+        string character = this.node.getValue();
         bool itsAnOp = false;
         switch (character) {
             case "+":
@@ -249,24 +251,36 @@ public class NodeScript : MonoBehaviour {
     public string GetOperation() {
         if (CheckIfOperation())
         {
-            return node.getValue();
+            return this.node.getValue();
         }
         else {
             return null;
         }        
     }
 
-    public bool CheckIfBothLeaves() 
+    public bool CheckIfBothLeaves(string op) 
     {
-        ASTNode leftChild = node.getLeftASTNode();
-        ASTNode rightChild = node.getRightASTNode();
+        ASTNode leftsLeftChild = null;
+        ASTNode leftsRightChild = null;
+        ASTNode rightsLeftChild = null;
+        ASTNode rightsRightChild = null;
 
-        ASTNode leftsLeftChild = leftChild.getLeftASTNode();
-        ASTNode leftsRightChild = leftChild.getRightASTNode();
-        ASTNode rightsLeftChild = rightChild.getLeftASTNode();
-        ASTNode rightsRightChild = rightChild.getRightASTNode();
+        ASTNode leftChild = this.node.getLeftASTNode();
+        ASTNode rightChild = this.node.getRightASTNode();
 
+        if (leftChild != null) {
+            leftsLeftChild = this.node.getLeftASTNode().getLeftASTNode();//maybe this second level crashes when getLeftASTNode doesn't exist
+            leftsRightChild = this.node.getLeftASTNode().getRightASTNode();
+        }
+
+        if (rightChild != null) {
+            rightsLeftChild = this.node.getRightASTNode().getLeftASTNode();
+            rightsRightChild = this.node.getRightASTNode().getRightASTNode();
+        }
+        
         bool bothAreLeaves = false;
+
+        Debug.Log("CheckIfBothLeaves("+op+"):" + leftsLeftChild + "|" + leftsRightChild + "||" + rightsLeftChild + "|" + rightsRightChild);
 
         if (leftsLeftChild == null
             && leftsRightChild == null
@@ -296,7 +310,7 @@ public class NodeScript : MonoBehaviour {
         Console.WriteLine("nodeScript.Solve()");
         if (this.CheckIfOperation())
         {
-            if (this.CheckIfBothLeaves())
+            if (this.CheckIfBothLeaves(""))
             {
                 ASTNode leftChild = node.getLeftASTNode();
                 ASTNode rightChild = node.getRightASTNode();
@@ -308,7 +322,7 @@ public class NodeScript : MonoBehaviour {
                 //this.leftGameObjectChild.SetActive(false);
                 //this.rightGameObjectChild.SetActive(false);
                 //call up the operation storer in Player.cs
-                
+
             }
         }
         EventSystem.current.SetSelectedGameObject(null);

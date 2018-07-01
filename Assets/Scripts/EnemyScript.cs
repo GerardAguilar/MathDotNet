@@ -81,14 +81,14 @@ public class EnemyScript : MonoBehaviour {
             soundManager.PlaySound(5);
         }
         else if (other.gameObject.tag.Equals("Sword")) {
-            GetHit(other.transform.position, 2.5f);
-            AskForAttributeShards(other.ClosestPoint(player.transform.position));
-            //GetHit(playerScript.faceDirection, 1f);
-            //GetHit(playerScript.gameObject.transform.position, playerScript.faceDirection, 2.5f);
-            time = Time.time;
-            //gameObject.SetActive(false);
-            Hit();
-            soundManager.PlaySound(1);
+            //GetHit(other.transform.position, 2.5f);
+            //AskForAttributeShards(other.ClosestPoint(player.transform.position));
+            ////GetHit(playerScript.faceDirection, 1f);
+            ////GetHit(playerScript.gameObject.transform.position, playerScript.faceDirection, 2.5f);
+            //time = Time.time;
+            ////gameObject.SetActive(false);
+            //Hit();
+            //soundManager.PlaySound(1);
         }
     }
 

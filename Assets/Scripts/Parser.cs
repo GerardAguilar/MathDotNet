@@ -64,7 +64,7 @@ public class Parser : MonoBehaviour
         for (int i = 0; i < nodeObjects.Count; i++)
         {
             ns = nodeObjects[i].GetComponent<NodeScript>();
-            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves())
+            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves(""))
             {
                 //should return ns above
                 //doesn't need to get the actual operation
@@ -78,22 +78,37 @@ public class Parser : MonoBehaviour
 
     public NodeScript FindFirstNodeWithOnlyLeaves(string op)
     {
-        NodeScript ns = null;
+        //NodeScript ns = null;
+        NodeScript returnNodeScript = null;
+        Boolean found = false;
+        Boolean isAnOp = false;
+        Boolean areBothLeaves = false;
         for (int i = 0; i < nodeObjects.Count; i++)
         {
-            ns = nodeObjects[i].GetComponent<NodeScript>();
-            if (ns.CheckIfOperation() && ns.CheckIfBothLeaves())
+            Debug.Log(i);
+            NodeScript nsTemp = null;
+            nsTemp = nodeObjects[i].GetComponent<NodeScript>();
+            isAnOp = nsTemp.CheckIfOperation();
+            areBothLeaves = nsTemp.CheckIfBothLeaves(op);
+            
+            Debug.Log(nodeObjects.Count+":"+i+ ": " +op + "|" + nsTemp.GetOperation() + " isAnOp: " + isAnOp + " | areBothLeaves: " + areBothLeaves);
+            if (isAnOp && areBothLeaves)
             {
-                if (ns.GetOperation().Equals(op))
+                if (nsTemp.GetOperation().Equals(op))
                 {
                     //should return ns above
+                    Debug.Log("Found: " + op);
+                    found = true;
+                    i = nodeObjects.Count;
+                    returnNodeScript = nsTemp;
                     break;
                 }
             }
             //nullifies ns on each pass
-            ns = null;
+            //ns = null;
         }
-        return ns;
+        Debug.Log("FindFirstNodeWithOnlyLeaves found: " + found);
+        return returnNodeScript;
     }
 
     public void UpdateLeaves(bool r, bool g, bool b, bool w) {
